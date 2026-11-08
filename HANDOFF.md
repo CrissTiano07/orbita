@@ -24,24 +24,24 @@ Testado em navegador headless 390×844: −2,75 OD → OE = OD → salvo correto
 
 Fecha o fio aberto "Encadeamento OD→OE" do CONTEXT 2 (§8, item 2).
 
-### 1.1 Revisão do teclado de dioptrias (08/11/2026) — só UX, dados salvos no mesmo formato
+### 1.1 Teclado de dioptrias refeito — "digite como se lê" (08/11/2026) — só UX
 
-⚠️ Em 08/11 o repositório recebeu o arquivo como `index (29).html`; o GitHub Pages serve `index.html`, que **continuava antigo**. Usar sempre o nome `index.html` e apagar as cópias `(1)`/`(29)`.
+⚠️ Em 08/11 o arquivo chegou ao repositório como `index (29).html`; o GitHub Pages serve `index.html`, que **continuava antigo**. Usar sempre o nome `index.html` e apagar as cópias `(1)`/`(29)`.
 
-| Defeito | Correção |
-|---|---|
-| ±0,25 mexia no módulo: em −2,00, "+0,25" virava −2,25 | ±0,25 mexe no valor com sinal: −2,00 +0,25 = −1,75 (cruza o zero) |
-| Digitar após um valor pronto emendava (2,75 + "3" → 23,75) | Campo recém-aberto ou número fechado com o quarto: próximo dígito **substitui** |
-| ⌫ apagava dígitos e deixava o quarto (−2,75 → −0,75) | ⌫ apaga na ordem inversa: primeiro o quarto, depois os dígitos |
-| Eixo editável sem cilíndrico | Eixo fica "n/a" e é pulado quando cil vazio/0; aviso "informe o eixo" quando há cil; cil limpo apaga o eixo salvo |
-| Confirmar OD sempre abria o OE (até para corrigir 1 campo) | Só segue para o OE se o OE estiver vazio; senão "Confirmar OD" fecha |
-| Adição digitada duas vezes | Ao seguir para o OE, adição do OD é repetida (aviso "confira") |
-| "OE = OD" ativo com OD vazio | Desativado até o OD ter valor |
-| Exibição com ponto (−2.75) | Exibição com vírgula (−2,75) no modal e nas linhas; armazenamento inalterado |
-| Notebook sem atalho | Teclado físico: dígitos, ⌫, Delete (limpar), − / +, ↑/↓ (±0,25), ←/→/Tab (campos), Enter (confirmar), Esc (fechar) |
-| Ordem dos controles | Sinal → teclado → quartos → ±0,25 (fluxo de cima para baixo) |
+Primeira revisão (sinal em botões, atalhos de quarto, ±0,25) ainda ficou confusa no teste do Cristiano. Substituída por teclado de **calculadora/discador**:
 
-Testado em navegador headless (16 cenários, 0 erros). **Falta teste no iPhone real.**
+- Digita na ordem em que se lê: `−` `0` `,` `2` `5` → **−0,25**.
+- Layout 4×4: `1 2 3 ⌫` · `4 5 6 −` · `7 8 9 +` · `, 0 [Próximo ›]`. "limpar" fica no visor.
+- Depois da vírgula só existem quartos: teclas que não formam quarto ficam **apagadas** (1ª casa: 0/2/5/7; 2ª: 0→0, 2→5, 5→0, 7→5). Parar em `,2`/`,7`/`,5` completa sozinho (,25/,75/,50).
+- Campo recém-aberto: a primeira tecla **substitui** o valor.
+- Sem sinal no esférico = positivo (mostra +). Cilíndrico já começa em −. Adição sempre +.
+- Eixo: só dígitos, até 180 (teclas que passariam de 180 ficam apagadas); "n/a" e pulado sem cilíndrico; cil limpo apaga o eixo.
+- "Próximo ›" percorre os campos; no último vira "Concluir". Confirmar OD só segue para o OE se o OE estiver vazio, levando a adição.
+- Notebook: digita igual (vírgula ou ponto), Enter = próximo, ⌫, Delete = limpar, ←/→/Tab, Esc.
+- Removidos: botões Negativo/Positivo, atalhos `,00 ,25 ,50 ,75`, ±0,25 e Anterior/Próximo separados.
+- Armazenamento inalterado (`"-0.25"`); tela com vírgula.
+
+Testado em navegador headless (14 cenários, 0 erros). **Falta teste no iPhone real.**
 
 ## 2. Próximos passos (ordem)
 
