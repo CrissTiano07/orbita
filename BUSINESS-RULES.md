@@ -23,7 +23,7 @@
 
 ## Entrada de dados (UX)
 - R13 · Número clínico → modal-teclado; escolha → toque (chips/lista); texto → teclado nativo.
-- R14 · Receita: teclado de calculadora, digitado na ordem em que se lê (− 0 , 2 5). Depois da vírgula só quartos (teclas inválidas apagadas). Primeira tecla em campo recém-aberto substitui o valor. Medições: passo ±0,5 mm.
+- R14 · Receita: teclado de calculadora com vírgula automática (padrão Pix: dígitos entram pela direita; − 0 2 5 = −0,25; tecla 00 para inteiros). Só quartos: não avança fora de ,00 ,25 ,50 ,75. Primeira tecla em campo recém-aberto substitui o valor. O outro olho fica visível para conferência. Medições: passo ±0,5 mm.
 - R14a · Eixo só existe com cilíndrico ≠ 0; sem cilíndrico, o eixo não é editado nem salvo.
 - R14b · Exibição na tela com vírgula; armazenamento com ponto (formato numérico).
 - R15 · Barra de ação some durante a digitação (`body.typing`).

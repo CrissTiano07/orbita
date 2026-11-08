@@ -28,20 +28,20 @@ Fecha o fio aberto "Encadeamento OD→OE" do CONTEXT 2 (§8, item 2).
 
 ⚠️ Em 08/11 o arquivo chegou ao repositório como `index (29).html`; o GitHub Pages serve `index.html`, que **continuava antigo**. Usar sempre o nome `index.html` e apagar as cópias `(1)`/`(29)`.
 
-Primeira revisão (sinal em botões, atalhos de quarto, ±0,25) ainda ficou confusa no teste do Cristiano. Substituída por teclado de **calculadora/discador**:
+Histórico: 1ª revisão (sinal em botões, atalhos de quarto, ±0,25) ficou confusa; 2ª (calculadora com vírgula) aprovada na ideia, com pedido de **vírgula automática**. Estado atual:
 
-- Digita na ordem em que se lê: `−` `0` `,` `2` `5` → **−0,25**.
-- Layout 4×4: `1 2 3 ⌫` · `4 5 6 −` · `7 8 9 +` · `, 0 [Próximo ›]`. "limpar" fica no visor.
-- Depois da vírgula só existem quartos: teclas que não formam quarto ficam **apagadas** (1ª casa: 0/2/5/7; 2ª: 0→0, 2→5, 5→0, 7→5). Parar em `,2`/`,7`/`,5` completa sozinho (,25/,75/,50).
-- Campo recém-aberto: a primeira tecla **substitui** o valor.
-- Sem sinal no esférico = positivo (mostra +). Cilíndrico já começa em −. Adição sempre +.
-- Eixo: só dígitos, até 180 (teclas que passariam de 180 ficam apagadas); "n/a" e pulado sem cilíndrico; cil limpo apaga o eixo.
+- **Vírgula automática, padrão Pix:** os dígitos entram pela direita. `−` `0` `2` `5` → **−0,25** · `2 7 5` → 2,75 · `1 0 0 0` → 10,00.
+- Tecla **00** para valores inteiros: `−` `2` `00` → −2,00. Máximo 4 dígitos (99,99).
+- Layout 4×4: `1 2 3 ⌫` · `4 5 6 −` · `7 8 9 +` · `00 0 [Próximo ›]`. "limpar" fica no visor.
+- Só quartos: se o valor não terminar em 00/25/50/75, o campo não deixa avançar (visor âmbar + aviso). Durante a digitação não bloqueia (0,12 é passo intermediário de 1,25).
+- **Olho já preenchido à mostra:** faixa tracejada no topo com os 4 valores do outro olho, para conferência visual enquanto preenche.
+- Campo recém-aberto: a primeira tecla substitui o valor. Esférico sem sinal = positivo. Cilíndrico já começa em −. Adição sempre +.
+- Eixo: só dígitos, até 180; "n/a" e pulado sem cilíndrico; cil limpo apaga o eixo.
 - "Próximo ›" percorre os campos; no último vira "Concluir". Confirmar OD só segue para o OE se o OE estiver vazio, levando a adição.
-- Notebook: digita igual (vírgula ou ponto), Enter = próximo, ⌫, Delete = limpar, ←/→/Tab, Esc.
-- Removidos: botões Negativo/Positivo, atalhos `,00 ,25 ,50 ,75`, ±0,25 e Anterior/Próximo separados.
+- Notebook: mesmos dígitos, Enter = próximo, ⌫, Delete = limpar, ←/→/Tab, Esc.
 - Armazenamento inalterado (`"-0.25"`); tela com vírgula.
 
-Testado em navegador headless (14 cenários, 0 erros). **Falta teste no iPhone real.**
+Testado em navegador headless (12 cenários, 0 erros). **Falta teste no iPhone real.**
 
 ## 2. Próximos passos (ordem)
 

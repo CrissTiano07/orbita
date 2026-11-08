@@ -137,6 +137,12 @@
   .steps button.sgn{flex:0 0 34%;background:#fff;border-color:var(--line);color:var(--ink)}
   .mtab.off{opacity:.45}
   .mbig{position:relative}
+  .mbig.bad{border-color:#e3a33b;background:#fff6e8}
+  .oeye{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:10px;border:1px dashed var(--line);border-radius:12px;background:#fff}
+  .oeye .badge{flex:none;width:32px;height:32px;font-size:12px;margin:0}
+  .oeye .c{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+  .oeye .c .l{font-size:10px;color:var(--mut)}
+  .oeye .c .v{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink)}
   .mclr{position:absolute;top:8px;right:8px;border:0;background:transparent;color:var(--acc-d);font-family:var(--sans);font-size:13px;font-weight:600;min-height:36px;padding:0 10px;cursor:pointer}
   .kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:6px}
   .kp button{border:1px solid var(--line);background:#fff;border-radius:14px;min-height:60px;font-family:var(--mono);font-size:26px;font-weight:500;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -513,65 +519,55 @@ function rxRowsHTML(){return ["od","oe"].map(eye=>`<div class="rxr rxrow"><span 
 function wireRxCells(){document.querySelectorAll("#rxRows .rxcell").forEach(c=>c.onclick=()=>openRxModal(c.dataset.eye,c.dataset.f));}
 function refreshRxRows(){const el=document.getElementById("rxRows");if(el){el.innerHTML=rxRowsHTML();wireRxCells();}liveRxValidate();}
 
-/* receita modal — teclado "digite como se lê": − 0 , 2 5  →  −0,25
-   Depois da vírgula só existem quartos: a tecla seguinte que não forma quarto fica apagada.
-   Cada campo guarda o texto digitado (ex. "-0,25"); só vira número ao confirmar. */
+/* receita modal — vírgula automática (padrão Pix): os dígitos entram pela direita.
+   − 0 2 5 → −0,25 · 2 7 5 → 2,75 · 1 0 0 0 → 10,00 · tecla 00 para inteiros (2 00 → 2,00).
+   Cada campo guarda sinal + dígitos (ex. "-25"); só vira número ao confirmar. */
 let rxModal=null;
 function rxBase(f){return f==="cil"?"-":"";} /* cilíndrico começa em − (mais comum) */
 function rxInit(f,v){if(v===""||v==null)return rxBase(f);
   if(f==="eixo")return String(v);
   const n=parseFloat(v);if(isNaN(n))return rxBase(f);
-  const body=Math.abs(n).toFixed(2).replace(".",",");
-  if(f==="ad")return body;
-  return (String(v)[0]==="-"||n<0?"-":"+")+body;}
-function rxSplit(s){const sign=(s[0]==="-"||s[0]==="+")?s[0]:"";const body=s.slice(sign.length);
-  const i=body.indexOf(",");return{sign,body,hasComma:i>=0,intp:i>=0?body.slice(0,i):body,dec:i>=0?body.slice(i+1):""};}
-function rxVal(f,s){const p=rxSplit(s);if(p.body===""||p.body===",")return "";
-  if(f==="eixo")return p.body;
-  const dec=({"":"00","0":"00","2":"25","5":"50","7":"75"})[p.dec]??p.dec; /* ,2 vira ,25 · ,7 vira ,75 */
-  const n=parseFloat((p.intp||"0")+"."+dec);if(isNaN(n))return "";
-  if(f==="ad")return n.toFixed(2);
-  return (p.sign==="-"?"-":"+")+n.toFixed(2);}
+  const d=String(Math.round(Math.abs(n)*100));
+  if(f==="ad")return d;
+  return (String(v)[0]==="-"||n<0?"-":"+")+d;}
+function rxSplit(s){const sign=(s[0]==="-"||s[0]==="+")?s[0]:"";return{sign,d:s.slice(sign.length)};}
+function rxCents(s){const p=rxSplit(s);return p.d===""?null:parseInt(p.d);}
+function rxVal(f,s){if(f==="eixo")return s;const c=rxCents(s);if(c===null)return "";
+  const n=(c/100).toFixed(2);if(f==="ad")return n;return (rxSplit(s).sign==="-"?"-":"+")+n;}
+function rxQuarterOk(f,s){if(f==="eixo")return true;const c=rxCents(s);return c===null||c%25===0;}
 function rxDisp(f,s){if(f==="eixo")return s===""?"—":s+"°";
-  const p=rxSplit(s),sg=p.sign==="-"?"−":p.sign;
-  if(p.body==="")return sg||"—";
-  return (f==="ad"?"+":(sg||"+"))+p.body;}
+  const p=rxSplit(s),sg=p.sign==="-"?"−":"+",c=rxCents(s);
+  if(c===null)return p.sign==="-"?"−":"—";
+  return (f==="ad"?"+":sg)+(c/100).toFixed(2).replace(".",",");}
 function rxEmptyCil(){const v=rxVal("cil",rxModal.s.cil);return v===""||parseFloat(v)===0;}
 function rxCur(){const f=rxModal.field;return rxModal.fresh?rxBase(f):rxModal.s[f];}
-function rxAllowed(k){const f=rxModal.field,s=rxCur(),p=rxSplit(s);
+function rxAppend(f,s,k){if(f==="eixo"){const n=(s+k).replace(/^0+(?=\d)/,"");return (n.length<=3&&parseInt(n)<=180)?n:null;}
+  const p=rxSplit(s),d=(p.d+k).replace(/^0+(?=\d)/,"");return d.length<=4?p.sign+d:null;}
+function rxAllowed(k){const f=rxModal.field,s=rxCur();
   if(k==="-"||k==="+")return f==="esf"||f==="cil";
-  if(k===",")return f!=="eixo"&&!p.hasComma;
-  if(/^[0-9]$/.test(k)){
-    if(f==="eixo"){const n=(s==="0"?"":s)+k;return n.length<=3&&parseInt(n)<=180;}
-    if(!p.hasComma){const i=(p.intp==="0"?"":p.intp)+k;return i.length<=2;}
-    if(p.dec.length===0)return "0257".includes(k);
-    if(p.dec.length===1)return k===({"0":"0","2":"5","5":"0","7":"5"})[p.dec];
-    return false;}
+  if(k==="00"||/^[0-9]$/.test(k))return rxAppend(f,s,k)!==null;
   return true;}
 function rxKey(k){if(!rxModal)return;const f=rxModal.field;
-  if(k==="back"){haptic();let s=rxModal.s[f];rxModal.fresh=false;
-    s=s.slice(0,-1);
-    rxModal.s[f]=s;renderRxModal();return;}
+  if(k==="back"){haptic();rxModal.s[f]=rxModal.s[f].slice(0,-1);rxModal.fresh=false;renderRxModal();return;}
   if(k==="clear"){haptic();rxModal.s[f]=rxBase(f);rxModal.fresh=false;renderRxModal();return;}
   if(!rxAllowed(k))return;haptic();
-  let s=rxCur();const p=rxSplit(s);
-  if(k==="-"||k==="+")s=k+p.body;
-  else if(k===",")s+=(p.intp===""?"0,":",");
-  else if(f==="eixo")s=(s==="0"?"":s)+k;
-  else if(!p.hasComma)s=(p.intp==="0"?p.sign:s)+k;
-  else s+=k;
+  let s=rxCur();
+  if(k==="-"||k==="+")s=k+rxSplit(s).d;else s=rxAppend(f,s,k);
   rxModal.s[f]=s;rxModal.fresh=false;
   if(f==="cil"&&rxEmptyCil())rxModal.s.eixo="";
   renderRxModal();}
 function rxFieldsActive(){return RX_FIELDS.filter(ff=>!(ff==="eixo"&&rxEmptyCil()));}
-function rxGoto(f){if(f==="eixo"&&rxEmptyCil()){toast("Eixo só existe com cilíndrico.");return;}
-  rxModal.field=f;rxModal.fresh=true;renderRxModal();}
+/* não deixa sair de um campo com valor fora dos quartos */
+function rxLeaveOk(){const f=rxModal.field;if(rxQuarterOk(f,rxModal.s[f]))return true;
+  toast("Dioptria termina em ,00 ,25 ,50 ou ,75");rxModal.bad=true;renderRxModal();return false;}
+function rxGoto(f){if(f===rxModal.field)return;if(f==="eixo"&&rxEmptyCil()){toast("Eixo só existe com cilíndrico.");return;}
+  if(!rxLeaveOk())return;rxModal.field=f;rxModal.fresh=true;rxModal.bad=false;renderRxModal();}
 function rxNav(dir){const L=rxFieldsActive(),i=L.indexOf(rxModal.field)+dir;
-  if(i>=0&&i<L.length){rxModal.field=L[i];rxModal.fresh=true;renderRxModal();}}
+  if(i>=0&&i<L.length&&rxLeaveOk()){rxModal.field=L[i];rxModal.fresh=true;rxModal.bad=false;renderRxModal();}}
 function rxIsLast(){const L=rxFieldsActive();return L.indexOf(rxModal.field)===L.length-1;}
 function rxNext(){haptic();if(rxIsLast())rxConfirm();else rxNav(1);}
 function openRxModal(eye,field){haptic();const g=form.rx[eye];
-  rxModal={eye,field,fresh:true,s:{}};RX_FIELDS.forEach(f=>rxModal.s[f]=rxInit(f,g[f]));
+  rxModal={eye,field,fresh:true,bad:false,s:{}};RX_FIELDS.forEach(f=>rxModal.s[f]=rxInit(f,g[f]));
   if(field==="eixo"&&rxEmptyCil())rxModal.field="cil";
   document.getElementById("rxModal").hidden=false;document.body.style.overflow="hidden";
   document.addEventListener("keydown",rxKeydown);renderRxModal();}
@@ -584,6 +580,8 @@ function closeRxModal(commit){const m=document.getElementById("rxModal");
 function oeVazio(){const e=form.rx.oe;return !e.esf&&!e.cil&&!e.eixo&&!e.ad;}
 function odVazio(){const e=form.rx.od;return !e.esf&&!e.cil&&!e.eixo&&!e.ad;}
 function rxConfirm(){if(!rxModal)return;
+  const bad=RX_FIELDS.find(f=>!rxQuarterOk(f,rxModal.s[f]));
+  if(bad){rxModal.field=bad;rxModal.fresh=false;rxModal.bad=true;renderRxModal();toast("Dioptria termina em ,00 ,25 ,50 ou ,75");return;}
   if(rxModal.eye==="od"&&oeVazio()){const ad=rxVal("ad",rxModal.s.ad);closeRxModal(true);
     openRxModal("oe","esf");
     if(ad){rxModal.s.ad=rxInit("ad",ad);renderRxModal();toast("Adição do OD repetida no OE — confira.");}}
@@ -591,11 +589,11 @@ function rxConfirm(){if(!rxModal)return;
 function rxConfirmNext(){rxConfirm();}
 function rxCopyOD(){if(odVazio()){toast("OD ainda está vazio.");return;}
   haptic();const g=form.rx.od;RX_FIELDS.forEach(f=>rxModal.s[f]=rxInit(f,g[f]));
-  rxModal.fresh=true;renderRxModal();toast("Valores do OD copiados — confira e confirme.");}
-/* teclado físico (notebook): digite como se lê; Enter = próximo */
+  rxModal.fresh=true;rxModal.bad=false;renderRxModal();toast("Valores do OD copiados — confira e confirme.");}
+/* teclado físico (notebook): mesmos dígitos; Enter = próximo */
 function rxKeydown(e){if(!rxModal)return;const k=e.key;
   if(/^[0-9]$/.test(k)||k==="-"||k==="+"){e.preventDefault();rxKey(k);}
-  else if(k===","||k==="."){e.preventDefault();rxKey(",");}
+  else if(k===","||k==="."){e.preventDefault();}
   else if(k==="Backspace"){e.preventDefault();rxKey("back");}
   else if(k==="Delete"){e.preventDefault();rxKey("clear");}
   else if(k==="Enter"){e.preventDefault();rxNext();}
@@ -603,11 +601,16 @@ function rxKeydown(e){if(!rxModal)return;const k=e.key;
   else if(k==="ArrowLeft"||(k==="Tab"&&e.shiftKey)){e.preventDefault();rxNav(-1);}
   else if(k==="Escape"){e.preventDefault();closeRxModal(false);}}
 function rxWarn(){const f=rxModal.field,v=rxVal(f,rxModal.s[f]),n=Math.abs(parseFloat(v));
+  if(rxModal.bad&&!rxQuarterOk(f,rxModal.s[f]))return "Termine em ,00 ,25 ,50 ou ,75";
   if((f==="esf"||f==="cil")&&n>30)return "Fora da faixa — máximo 30 dioptrias";
   if(f==="ad"&&n>4)return "Adição costuma ir até +4,00";
   if(f==="cil"&&!rxEmptyCil()&&rxModal.s.eixo==="")return "Com cilíndrico, o eixo vem em seguida";
   return "";}
-const RX_HINT={esf:"ex.: − 2 , 7 5",cil:"já começa em −  ·  ex.: 1 , 2 5",eixo:"grau de 0 a 180",ad:"sempre positiva  ·  ex.: 2 , 0 0"};
+const RX_HINT={esf:"ex.: − 2 7 5  ·  − 2 00",cil:"já começa em −  ·  ex.: 1 2 5",eixo:"grau de 0 a 180",ad:"sempre positiva  ·  ex.: 2 00"};
+/* olho já preenchido, à mostra para conferência */
+function rxOtherEye(){const eye=rxModal.eye,o=eye==="od"?"oe":"od",g=form.rx[o];
+  if(!g.esf&&!g.cil&&!g.eixo&&!g.ad)return "";
+  return `<div class="oeye" aria-label="Valores do ${o.toUpperCase()} para conferência"><span class="badge">${o.toUpperCase()}</span>${RX_FIELDS.map(f=>`<span class="c"><span class="l">${RX_SHORT[f]}</span><span class="v">${formatDisp(f,g[f])}</span></span>`).join("")}</div>`;}
 function renderRxModal(){const f=rxModal.field,eye=rxModal.eye,noAxis=rxEmptyCil();
   const tabs=RX_FIELDS.map(ff=>{const off=ff==="eixo"&&noAxis;const val=off?"n/a":rxDisp(ff,rxModal.s[ff]);
     return `<button class="mtab ${ff===f?"on":""} ${off?"off":""}" onclick="rxGoto('${ff}')"><span class="l">${RX_SHORT[ff]}</span><span class="v ${val==="—"||off?"ph":""}">${val}</span></button>`;}).join("");
@@ -616,14 +619,15 @@ function renderRxModal(){const f=rxModal.field,eye=rxModal.eye,noAxis=rxEmptyCil
     ${K("1","1")}${K("2","2")}${K("3","3")}<button class="fn" onclick="rxKey('back')" aria-label="Apagar">⌫</button>
     ${K("4","4")}${K("5","5")}${K("6","6")}${K("-","−","fn sg")}
     ${K("7","7")}${K("8","8")}${K("9","9")}${K("+","+","fn sg")}
-    ${K(",",",","fn")}${K("0","0")}<button class="nx" onclick="rxNext()">${rxIsLast()?"Concluir":"Próximo ›"}</button>
+    ${K("00","00","fn")}${K("0","0")}<button class="nx" onclick="rxNext()">${rxIsLast()?"Concluir":"Próximo ›"}</button>
   </div>`;
-  const goOE=eye==="od"&&oeVazio();
+  const goOE=eye==="od"&&oeVazio(),bad=rxModal.bad&&!rxQuarterOk(f,rxModal.s[f]);
   document.getElementById("rxModal").innerHTML=`
     <div class="mhd"><h3>Receita — <span>${eye.toUpperCase()}</span></h3>${eye==="oe"?`<button class="mcopy" onclick="rxCopyOD()" ${odVazio()?"disabled":""}>OE = OD</button>`:""}<button class="x" onclick="closeRxModal(false)" aria-label="Fechar sem salvar">×</button></div>
     <div class="mbody">
+      ${rxOtherEye()}
       <div class="mtabs">${tabs}</div>
-      <div class="mbig"><div class="cur">${rxDisp(f,rxModal.s[f])}</div><div class="lab">${RX_LABEL[f]} · ${RX_HINT[f]}</div>
+      <div class="mbig ${bad?"bad":""}"><div class="cur">${rxDisp(f,rxModal.s[f])}</div><div class="lab">${RX_LABEL[f]} · ${RX_HINT[f]}</div>
         <button class="mclr" onclick="rxKey('clear')">limpar</button></div>
       <div class="mwarn">${rxWarn()}</div>
       ${kp}
