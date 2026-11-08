@@ -35,3 +35,11 @@
 - R19 · Sem fundos cinza; rótulos em preto sólido; só barras pretas do status e do "Uso do laboratório".
 - R20 · Numeração sequencial por consultor (`OS-000047`).
 - R21 · Emitente em Ajustes = dados da **ótica** (nome e CNPJ), nunca dado pessoal.
+
+## Armações (catálogo)
+- R22 · Ref sequencial `ORB-0001`, nunca reaproveitada enquanto existir; é o nome do arquivo da foto e o id no banco.
+- R23 · Obrigatórios no cadastro: modelo, formato e medidas da haste (lente, ponte, haste). Sem preço.
+- R24 · Tamanho: largura total ≤129 mm = P · 130–139 = M · ≥140 = G. Sem largura total, estimar 2×lente + ponte + 8 mm e mostrar "(estimada)".
+- R25 · Teto de armações cadastradas (padrão 200, ajustável em Ajustes). No teto, não cadastra; vendida ou fora de linha sai do cadastro e do catálogo.
+- R26 · Até 3 fotos por armação: frente, lado, rosto. Fotos fora do Firebase (Drive → script → GitHub) até decisão do piloto.
+
