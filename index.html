@@ -247,6 +247,41 @@
   .icobtn{background:var(--surf2);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:13px;
     color:var(--mut);cursor:pointer;font-weight:500;min-height:40px}
   .icobtn:active{border-color:var(--acc);color:var(--acc-d)} .icobtn.del{color:var(--err)}
+  /* armações */
+  .armnew{width:100%;margin-bottom:12px}
+  .armnew[disabled]{opacity:.45}
+  .armwarn{border:1px solid #e9c46a;background:#fff8e6;color:#7a5a00;border-radius:var(--rf);padding:11px 14px;font-size:13.5px;margin-bottom:12px}
+  .armwarn.err{border-color:#e5a3a0;background:#fdf0ef;color:var(--err)}
+  .armfil{margin-bottom:12px}
+  .armfil .chip .cnt{font-family:var(--mono);font-size:12px;opacity:.7;margin-left:4px}
+  .arm .tam{display:inline-block;background:var(--acc-bg);color:var(--acc-d);border-radius:6px;padding:1px 7px;margin-left:4px;font-weight:600}
+  .arm .foto{font-family:var(--sans);font-size:11.5px;margin-left:6px;padding:1px 8px;border-radius:10px}
+  .arm .foto.no{background:#f1f2f0;color:var(--mut)} .arm .foto.pend{background:#fff3d6;color:#7a5a00} .arm .foto.ok{background:var(--acc-tint);color:var(--acc-d)}
+  .arm .mono,.armfmod .mono{font-family:var(--mono)}
+  .arm .status[data-s="disponivel"]{color:var(--acc-d)} .arm .status[data-s="prova"]{color:#8a5a00} .arm .status[data-s="indisponivel"]{color:var(--mut)}
+  .armback{margin:-4px 0 2px}
+  .armback .btn{padding:10px 0;justify-content:flex-start}
+  .armref{font-size:15px;color:var(--acc-d)}
+  .armlab{margin:14px 0 8px}
+  .armmed{display:grid;grid-template-columns:1fr auto 1fr auto 1.2fr;gap:8px;align-items:center}
+  .armmed .field input{font-family:var(--mono);font-size:20px}
+  .armmed .sep{font-family:var(--mono);font-size:20px;color:var(--dim)}
+  .armtot{margin-top:11px}
+  .armtam{margin-top:12px;font-size:14px;color:var(--ink);background:var(--acc-tint);border-radius:var(--rf);padding:11px 14px}
+  .armqtd{display:flex;align-items:center;gap:14px}
+  .armqtd .icobtn{min-width:48px;min-height:44px;font-size:20px}
+  .armqtd span{font-family:var(--mono);font-size:20px;min-width:28px;text-align:center}
+  .armerr{color:var(--err);font-size:14px;font-weight:500;min-height:4px;margin:0 2px 10px}
+  .armsave{margin:4px 0 24px} .armsave .btn{width:100%}
+  .armduo .btn{flex:1;width:auto}
+  .armduo{display:flex;gap:10px}
+  .armfoto{text-align:center}
+  .armbigref{font-family:var(--mono);font-size:42px;font-weight:600;letter-spacing:.02em;color:var(--ink)}
+  .armfmod{color:var(--mut);font-size:14px;margin-top:4px}
+  .armvistas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  .armvista{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:96px;border:1.5px dashed var(--line);border-radius:var(--r);cursor:pointer;text-align:center;padding:10px 6px;background:var(--surf2)}
+  .armvista .t{font-weight:600;font-size:15px} .armvista .s{font-size:12px;color:var(--mut)}
+  .armvista.feita{border-style:solid;border-color:var(--acc);background:var(--acc-tint)} .armvista.feita .s{color:var(--acc-d)}
   .empty{border:1px dashed var(--line);border-radius:var(--r);padding:36px 18px;text-align:center;color:var(--mut);font-size:14px}
 
   /* transpose */
@@ -411,6 +446,7 @@
 <nav class="nav" id="nav">
   <button data-t="atend" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 3.5V6h6V3.5M12 11v5M9.5 13.5h5"/></svg>Atender</button>
   <button data-t="ordens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Ordens</button>
+  <button data-t="arm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="14" r="3.6"/><circle cx="17" cy="14" r="3.6"/><path d="M10.6 13.4q1.4-1 2.8 0M3.4 13 2 9.5M20.6 13 22 9.5"/></svg>Armações</button>
   <button data-t="ferr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M17 4l3 3-3 3M20 7H8M7 20l-3-3 3-3M4 17h12"/></svg>Transpor</button>
   <button data-t="cfg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 8h14M5 16h14"/><circle cx="9" cy="8" r="2.3" fill="var(--surf)"/><circle cx="15" cy="16" r="2.3" fill="var(--surf)"/></svg>Ajustes</button>
 </nav>
@@ -460,20 +496,23 @@ const IC={save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 let S=null, editingId=null, current="atend", form=null;
 
 /* --- camada de dados: único ponto que conhece o Firestore --- */
-function defaults(){return{config:{nome:"",cnpj:"",contato:""},clientes:[],ordens:[],counters:{local:1}};}
+function defaults(){return{config:{nome:"",cnpj:"",contato:"",tetoArm:200},clientes:[],ordens:[],armacoes:[],counters:{local:1,armacao:1}};}
 function docBase(){return db.collection("consultores").doc(user.uid);}
 async function repoLoadAll(){
   const base=docBase(), cfg=await base.get();
-  if(cfg.exists){const d=cfg.data();S={config:d.config||{},counters:d.counters||{local:1},clientes:[],ordens:[]};}
+  if(cfg.exists){const d=cfg.data();S={config:d.config||{},counters:d.counters||{local:1},clientes:[],ordens:[],armacoes:[]};}
   else{S=defaults();S.config.nome=user.displayName||"";await base.set({config:S.config,counters:S.counters});}
-  S.config=Object.assign({nome:"",cnpj:"",contato:""},S.config);S.counters=Object.assign({local:1},S.counters);
+  S.config=Object.assign({nome:"",cnpj:"",contato:"",tetoArm:200},S.config);S.counters=Object.assign({local:1,armacao:1},S.counters);
   const cs=await base.collection("clientes").get();S.clientes=cs.docs.map(x=>x.data());
   const os=await base.collection("ordens").get();S.ordens=os.docs.map(x=>x.data());
+  const ar=await base.collection("armacoes").get();S.armacoes=ar.docs.map(x=>x.data());
 }
 function saveConsultor(){return docBase().set({config:S.config,counters:S.counters},{merge:true}).catch(e=>console.error("consultor",e));}
 function saveCliente(c){return docBase().collection("clientes").doc(c.id).set(c).catch(e=>console.error("cliente",e));}
 function saveOrdemDoc(o){return docBase().collection("ordens").doc(o.id).set(o).catch(e=>console.error("ordem",e));}
 function deleteOrdemDoc(id){return docBase().collection("ordens").doc(id).delete().catch(e=>console.error("del",e));}
+function saveArmacao(a){return docBase().collection("armacoes").doc(a.ref).set(a).catch(e=>{console.error("armacao",e);toast("Falha ao salvar "+a.ref+".");});}
+function deleteArmacao(ref){return docBase().collection("armacoes").doc(ref).delete().catch(e=>console.error("del armacao",e));}
 
 function uid(){return Math.random().toString(36).slice(2,9);}
 function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2000);}
@@ -494,7 +533,7 @@ function brDate(iso){if(!iso)return"";const[y,m,d]=iso.split("-");return d+"/"+m
 function brShort(iso){const M=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];const[y,m,d]=iso.split("-");return d+" "+M[+m-1];}
 function initials(n){n=(n||"").trim();if(!n)return"—";const p=n.split(/\s+/);return((p[0][0]||"")+(p.length>1?p[p.length-1][0]:"")).toUpperCase();}
 
-function nav(t){current=t;document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+function nav(t){if(t==="arm"&&current!=="arm"){armView="list";armForm=null;}current=t;document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
   document.body.classList.toggle("atend",t==="atend");draw();window.scrollTo(0,0);}
 
 /* receita */
@@ -874,6 +913,152 @@ function drawOrdens(){
       box.appendChild(el);});};
   render();document.getElementById("ordSearch").addEventListener("input",e=>render(e.target.value));}
 
+/* armações — estoque para o catálogo (fotos fora do Firebase: Drive → script → GitHub) */
+const ARM_FORMATOS=["Redondo","Retangular","Quadrado","Gatinho","Aviador","Oval","Hexagonal","Outro"];
+const ARM_MATERIAIS=["Acetato","Metal","TR90","Titânio","Misto"];
+const ARM_CORES=["Preto","Tartaruga","Transparente","Dourado","Prata","Azul","Vinho","Rosé"];
+const ARM_STATUS=[["disponivel","Disponível"],["prova","Em prova"],["indisponivel","Indisponível"]];
+const ARM_VISTAS=[["frente","Frente"],["lado","Lado"],["rosto","No rosto"]];
+let armView="list",armForm=null,armFiltro="todas",armBusca="",armFotoRef=null;
+function armTeto(){return parseInt(S.config.tetoArm)||200;}
+function armRefNum(n){return "ORB-"+String(n).padStart(4,"0");}
+function armNextRef(){let n=parseInt(S.counters.armacao)||1;while(S.armacoes.some(a=>a.ref===armRefNum(n)))n++;return armRefNum(n);}
+/* largura total: medida informada ou estimada (2 lentes + ponte + ~8 mm de laterais) */
+function armTotal(a){const t=parseInt(a.total);if(t>0)return{mm:t,est:false};
+  const l=parseInt(a.lente),p=parseInt(a.ponte);if(l>0&&p>0)return{mm:2*l+p+8,est:true};return{mm:0,est:true};}
+function armTamanho(a){const t=armTotal(a).mm;if(!t)return "";return t<=129?"P":t<=139?"M":"G";}
+function armMedidas(a){return (a.lente||"—")+"□"+(a.ponte||"—")+"-"+(a.haste||"—");}
+function armStatusLabel(s){return (ARM_STATUS.find(x=>x[0]===s)||["","—"])[1];}
+function armFotoInfo(a){const f=a.foto||{},n=ARM_VISTAS.filter(([v])=>f[v]).length;
+  if(!n)return{cls:"no",txt:"sem foto"};
+  const pend=ARM_VISTAS.some(([v])=>f[v]==="pendente");return pend?{cls:"pend",txt:"foto aguardando tratamento"}:{cls:"ok",txt:n+" foto"+(n>1?"s":"")};}
+function armAtivas(){return S.armacoes.length;}
+function blankArm(){return{ref:armNextRef(),modelo:"",formato:"",lente:"",ponte:"",haste:"",total:"",material:"",cor:"",
+  status:"disponivel",qtd:1,foto:{frente:"",lado:"",rosto:""},novo:true};}
+
+function drawArm(){if(armView==="form")return drawArmForm();if(armView==="foto")return drawArmFoto();drawArmList();}
+
+function drawArmList(){const teto=armTeto(),n=armAtivas(),cheio=n>=teto,perto=!cheio&&n>=Math.floor(teto*0.9);
+  const cont=k=>k==="todas"?S.armacoes.length:S.armacoes.filter(a=>a.status===k).length;
+  const filtros=[["todas","Todas"],...ARM_STATUS];
+  document.getElementById("view").innerHTML=`<div class="ptitle"><h1>Armações</h1><span class="meta">${n}/${teto}</span></div>
+    ${cheio?`<div class="armwarn err">Teto de ${teto} armações atingido. Exclua alguma (vendida ou fora de linha) para cadastrar outra. O teto muda em Ajustes.</div>`
+      :perto?`<div class="armwarn">Faltam ${teto-n} para o teto de ${teto} armações.</div>`:""}
+    <button class="btn pri armnew" id="armNew" ${cheio?"disabled":""}>+ Nova armação</button>
+    <div class="chips armfil">${filtros.map(([k,l])=>`<button class="chip ${armFiltro===k?"on":""}" data-f="${k}">${l} <span class="cnt">${cont(k)}</span></button>`).join("")}</div>
+    <label class="field search"><span class="flab">Buscar</span><input id="armSearch" value="${esc(armBusca)}" placeholder="Modelo, ref ou cor"></label>
+    <div class="ordens" id="armList"></div>`;
+  document.getElementById("armNew").onclick=()=>{if(armAtivas()>=armTeto())return;armForm=blankArm();armView="form";drawArm();window.scrollTo(0,0);};
+  document.querySelectorAll(".armfil .chip").forEach(c=>c.onclick=()=>{armFiltro=c.dataset.f;drawArmList();});
+  const render=()=>{const box=document.getElementById("armList"),q=armBusca.toLowerCase();
+    const list=[...S.armacoes].filter(a=>(armFiltro==="todas"||a.status===armFiltro)&&(a.ref+" "+a.modelo+" "+a.cor+" "+a.formato).toLowerCase().includes(q))
+      .sort((a,b)=>b.ref.localeCompare(a.ref));
+    if(!S.armacoes.length){box.innerHTML='<div class="empty">Nenhuma armação ainda.<br>Toque em <b>+ Nova armação</b>.</div>';return;}
+    if(!list.length){box.innerHTML='<div class="empty">Nada encontrado.</div>';return;}
+    box.innerHTML="";
+    list.forEach(a=>{const fi=armFotoInfo(a),tam=armTamanho(a),el=document.createElement("div");el.className="ord arm";
+      el.innerHTML=`<div class="id">${esc(a.ref)}${tam?` <span class="tam">${tam}</span>`:""} <span class="foto ${fi.cls}">${fi.txt}</span></div>
+        <div class="nm">${esc(a.modelo||"Sem nome")}</div>
+        <div class="meta">${esc(a.formato||"—")} · <span class="mono">${esc(armMedidas(a))}</span>${a.material?" · "+esc(a.material):""}${a.cor?" · "+esc(a.cor):""}${(parseInt(a.qtd)||1)>1?" · "+a.qtd+" un.":""}</div>
+        <div class="ctrl"><select class="status" data-s="${a.status}" aria-label="Status de ${esc(a.ref)}">${ARM_STATUS.map(([k,l])=>`<option value="${k}" ${a.status===k?"selected":""}>${l}</option>`).join("")}</select>
+          <button class="icobtn" data-a="foto">foto</button><button class="icobtn" data-a="edit">editar</button><button class="icobtn del" data-a="del">excluir</button></div>`;
+      el.querySelector(".status").addEventListener("change",e=>{a.status=e.target.value;e.target.dataset.s=a.status;a.atualizada=new Date().toISOString();saveArmacao(a);});
+      el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const k=b.dataset.a;
+        if(k==="foto"){armFotoRef=a.ref;armView="foto";drawArm();window.scrollTo(0,0);}
+        else if(k==="edit"){armForm=JSON.parse(JSON.stringify(a));armForm.novo=false;armView="form";drawArm();window.scrollTo(0,0);}
+        else if(k==="del"){if(confirm("Excluir "+a.ref+" ("+(a.modelo||"sem nome")+")?")){S.armacoes=S.armacoes.filter(x=>x.ref!==a.ref);deleteArmacao(a.ref);drawArmList();toast(a.ref+" excluída.");}}});
+      box.appendChild(el);});};
+  render();
+  document.getElementById("armSearch").addEventListener("input",e=>{armBusca=e.target.value;render();});}
+
+function armChips(id,opts,val){return `<div class="chips" id="${id}">${opts.map(o=>`<button type="button" class="chip ${val===o?"on":""}" data-v="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;}
+function armTamTxt(){const a=armForm,t=armTotal(a),tam=armTamanho(a);if(!tam)return "Preencha lente e ponte para calcular o tamanho.";
+  return `Tamanho <b>${tam}</b> · largura ${t.mm} mm${t.est?" (estimada)":""}`;}
+function drawArmForm(){const a=armForm,novo=a.novo;
+  const corOutra=a.cor&&!ARM_CORES.includes(a.cor)?a.cor:"";
+  document.getElementById("view").innerHTML=`<div class="armback"><button class="btn ghost" id="armVoltar">‹ Armações</button></div>
+    <div class="ptitle"><h1>${novo?"Nova armação":"Editar armação"}</h1><span class="meta armref">${esc(a.ref)}</span></div>
+    <div class="card"><div class="shead"><span class="n">01</span><span class="bar"></span><h2>Modelo</h2></div>
+      <label class="field"><span class="flab">Nome do modelo</span><input id="a_modelo" value="${esc(a.modelo)}" placeholder="Ex.: Lira, Atlas, Nara" autocomplete="off" enterkeyhint="next"></label>
+      <div class="flab armlab">Formato</div>${armChips("a_formato",ARM_FORMATOS,a.formato)}</div>
+    <div class="card"><div class="shead"><span class="n">02</span><span class="bar"></span><h2>Medidas da haste</h2></div>
+      <p class="hint">Os números gravados na parte de dentro da haste. Ex.: 52□18-140.</p>
+      <div class="armmed">
+        <label class="field"><span class="flab">Lente</span><input id="a_lente" inputmode="numeric" maxlength="2" value="${esc(a.lente)}" placeholder="52"></label>
+        <span class="sep" aria-hidden="true">□</span>
+        <label class="field"><span class="flab">Ponte</span><input id="a_ponte" inputmode="numeric" maxlength="2" value="${esc(a.ponte)}" placeholder="18"></label>
+        <span class="sep" aria-hidden="true">-</span>
+        <label class="field"><span class="flab">Haste</span><input id="a_haste" inputmode="numeric" maxlength="3" value="${esc(a.haste)}" placeholder="140"></label>
+      </div>
+      <label class="field armtot"><span class="flab">Largura total (opcional, mm)</span><input id="a_total" inputmode="numeric" maxlength="3" value="${esc(a.total)}" placeholder="régua de ponta a ponta"></label>
+      <div class="armtam" id="a_tam">${armTamTxt()}</div></div>
+    <div class="card"><div class="shead"><span class="n">03</span><span class="bar"></span><h2>Material e cor</h2></div>
+      <div class="flab armlab">Material</div>${armChips("a_material",ARM_MATERIAIS,a.material)}
+      <div class="flab armlab">Cor</div>${armChips("a_cor",ARM_CORES,ARM_CORES.includes(a.cor)?a.cor:"")}
+      <label class="field" style="margin-top:11px"><span class="flab">Outra cor</span><input id="a_cor_outra" value="${esc(corOutra)}" placeholder="Ex.: verde musgo"></label></div>
+    <div class="card"><div class="shead"><span class="n">04</span><span class="bar"></span><h2>Estoque</h2></div>
+      <div class="flab armlab">Status</div><div class="chips" id="a_status">${ARM_STATUS.map(([k,l])=>`<button type="button" class="chip ${a.status===k?"on":""}" data-v="${k}">${l}</button>`).join("")}</div>
+      <div class="flab armlab">Quantidade</div>
+      <div class="armqtd"><button type="button" class="icobtn" id="a_menos" aria-label="Diminuir quantidade">−</button><span id="a_qtd">${parseInt(a.qtd)||1}</span><button type="button" class="icobtn" id="a_mais" aria-label="Aumentar quantidade">+</button></div></div>
+    <div class="armerr" id="a_err"></div>
+    <div class="armsave"><button class="btn pri" id="a_salvar">${novo?"Salvar e tirar foto ›":"Salvar alterações"}</button></div>`;
+  const $=id=>document.getElementById(id);
+  $("armVoltar").onclick=()=>{armView="list";drawArm();};
+  const limpaErro=()=>{$("a_err").textContent="";};
+  $("view").querySelectorAll(".card").forEach(c=>{c.addEventListener("input",limpaErro);c.addEventListener("click",e=>{if(e.target.closest(".chip"))limpaErro();});});
+  const chipSel=(id,campo,extra)=>$(id).querySelectorAll(".chip").forEach(c=>c.onclick=()=>{haptic();a[campo]=a[campo]===c.dataset.v&&campo!=="status"?"":c.dataset.v;
+    $(id).querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.v===a[campo]));if(extra)extra();});
+  chipSel("a_formato","formato");chipSel("a_material","material");chipSel("a_status","status");
+  chipSel("a_cor","cor",()=>{$("a_cor_outra").value="";});
+  $("a_cor_outra").addEventListener("input",e=>{a.cor=e.target.value.trim();$("a_cor").querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));});
+  $("a_modelo").addEventListener("input",e=>a.modelo=e.target.value);
+  /* medidas: só dígitos e pula sozinho ao completar */
+  [["a_lente","lente",2,"a_ponte"],["a_ponte","ponte",2,"a_haste"],["a_haste","haste",3,"a_total"],["a_total","total",3,null]].forEach(([id,campo,max,prox])=>{
+    $(id).addEventListener("input",e=>{const v=e.target.value.replace(/\D/g,"").slice(0,max);e.target.value=v;a[campo]=v;$("a_tam").innerHTML=armTamTxt();
+      if(prox&&v.length===max)$(prox).focus();});});
+  const qtd=d=>{a.qtd=Math.max(1,Math.min(99,(parseInt(a.qtd)||1)+d));$("a_qtd").textContent=a.qtd;haptic();};
+  $("a_menos").onclick=()=>qtd(-1);$("a_mais").onclick=()=>qtd(1);
+  $("a_salvar").onclick=()=>{a.modelo=a.modelo.trim();
+    const falta=[];if(!a.modelo)falta.push("nome do modelo");if(!a.formato)falta.push("formato");
+    if(!a.lente||!a.ponte||!a.haste)falta.push("medidas da haste");
+    if(falta.length){$("a_err").textContent="Falta: "+falta.join(", ")+".";$("a_err").scrollIntoView({block:"center",behavior:"smooth"});return;}
+    if(a.novo&&armAtivas()>=armTeto()){$("a_err").textContent="Teto de "+armTeto()+" armações atingido.";return;}
+    const agora=new Date().toISOString(),novoReg=a.novo;delete a.novo;
+    a.tamanho=armTamanho(a);a.atualizada=agora;if(novoReg)a.criada=agora;
+    const i=S.armacoes.findIndex(x=>x.ref===a.ref);if(i>=0)S.armacoes[i]=a;else S.armacoes.push(a);
+    saveArmacao(a);
+    if(novoReg){const n=parseInt(a.ref.slice(4));if(n>=(parseInt(S.counters.armacao)||1)){S.counters.armacao=n+1;saveConsultor();}}
+    toast(a.ref+" salva.");
+    if(novoReg){armFotoRef=a.ref;armView="foto";}else armView="list";
+    armForm=null;drawArm();window.scrollTo(0,0);};}
+
+/* foto: sai do celular já com o nome da ref; o tratamento (fundo, escala) é feito pelo script */
+function drawArmFoto(){const a=S.armacoes.find(x=>x.ref===armFotoRef);if(!a){armView="list";return drawArm();}
+  const f=a.foto||(a.foto={frente:"",lado:"",rosto:""});
+  document.getElementById("view").innerHTML=`<div class="armback"><button class="btn ghost" id="armVoltar">‹ Armações</button></div>
+    <div class="card armfoto">
+      <div class="armbigref">${esc(a.ref)}</div>
+      <div class="armfmod">${esc(a.modelo)} · ${esc(a.formato)} · <span class="mono">${esc(armMedidas(a))}</span></div>
+      <p class="hint" style="margin:12px 0 0">Escreva <b>${esc(a.ref)}</b> numa etiqueta presa à armação. A foto sai do celular já com esse nome.</p></div>
+    <div class="card"><div class="shead"><span class="n">01</span><span class="bar"></span><h2>Fotos</h2></div>
+      <p class="hint">Fundo claro e liso, luz de janela, celular apoiado, armação de frente com as hastes abertas.</p>
+      <div class="armvistas">${ARM_VISTAS.map(([v,l])=>`<label class="armvista ${f[v]?"feita":""}">
+        <input type="file" accept="image/*" capture="environment" data-v="${v}" hidden>
+        <span class="t">${l}</span><span class="s">${f[v]==="pendente"?"tirada · aguardando tratamento":f[v]?"no catálogo":"tirar foto"}</span></label>`).join("")}</div>
+      <p class="hint" style="margin:12px 0 0">Depois de tirar, salve em <b>Arquivos</b> ou no <b>Drive</b>, na pasta <i>fotos_brutas</i>.</p></div>
+    <div class="armsave armduo"><button class="btn sec" id="armFim">Concluir</button><button class="btn pri" id="armProx" ${armAtivas()>=armTeto()?"disabled":""}>+ Próxima</button></div>`;
+  document.getElementById("armVoltar").onclick=document.getElementById("armFim").onclick=()=>{armView="list";drawArm();window.scrollTo(0,0);};
+  document.getElementById("armProx").onclick=()=>{armForm=blankArm();armView="form";drawArm();window.scrollTo(0,0);};
+  document.querySelectorAll(".armvista input").forEach(inp=>inp.addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;
+    const v=e.target.dataset.v,ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace("jpeg","jpg"),nome=a.ref+(v==="frente"?"":"_"+v)+"."+ext;
+    if(!await armEntregarFoto(new File([file],nome,{type:file.type||"image/jpeg"})))return;
+    a.foto[v]="pendente";a.atualizada=new Date().toISOString();saveArmacao(a);drawArmFoto();}));}
+async function armEntregarFoto(file){
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:file.name});toast(file.name+" pronta.");return true;}}
+  catch(e){if(e&&e.name==="AbortError"){toast("Foto não salva. Toque de novo para salvar.");return false;}}
+  const url=URL.createObjectURL(file),l=document.createElement("a");l.href=url;l.download=file.name;document.body.appendChild(l);l.click();l.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);toast(file.name+" baixada.");return true;}
+
 /* transpose */
 function drawFerr(){document.getElementById("view").innerHTML=`<div class="ptitle"><h1>Transposição</h1><span class="meta">± notação</span></div>
   <div class="card"><p class="hint">Converte a receita quando a lente tem limite de faixa por sinal.</p>
@@ -897,13 +1082,15 @@ function drawCfg(){document.getElementById("view").innerHTML=`<div class="ptitle
     <label class="field" style="margin-top:11px"><span class="flab">Telefone / WhatsApp do emitente</span><input id="c_contato" type="tel" value="${esc(S.config.contato)}" placeholder="(85) 9 0000-0000"></label></div>
   <div class="card"><div class="shead"><span class="n">02</span><span class="bar"></span><h2>Numeração</h2></div>
     <p class="hint">Sua contagem pessoal. A próxima OS será a #${S.counters.local}.</p>
-    <label class="field" style="max-width:200px"><span class="flab">Próxima OS (#)</span><input id="c_local" value="${S.counters.local}" inputmode="numeric"></label>
+    <div class="fgrid f2"><label class="field"><span class="flab">Próxima OS (#)</span><input id="c_local" value="${S.counters.local}" inputmode="numeric"></label>
+      <label class="field"><span class="flab">Teto de armações no catálogo</span><input id="c_teto" value="${armTeto()}" inputmode="numeric"></label></div>
     <div style="margin-top:14px"><button class="btn sec" id="c_save" style="max-width:220px">Salvar ajustes</button></div></div>
   <div class="card"><div class="shead"><span class="n">03</span><span class="bar"></span><h2>Conta</h2></div>
     <p class="hint">Conectado como ${esc((user&&user.email)||"—")}. Dados na nuvem (Firestore · São Paulo), sincronizados entre seus aparelhos.</p>
     <button class="btn ghost" id="c_out" style="justify-content:flex-start;padding-left:0">Sair da conta</button></div>`;
   document.getElementById("c_save").onclick=()=>{S.config.nome=document.getElementById("c_nome").value.trim();
     S.config.cnpj=document.getElementById("c_cnpj").value.trim();S.config.contato=document.getElementById("c_contato").value.trim();const l=parseInt(document.getElementById("c_local").value);if(l>0)S.counters.local=l;
+    const tt=parseInt(document.getElementById("c_teto").value);if(tt>0)S.config.tetoArm=Math.min(1000,tt);
     saveConsultor();paintWho();toast("Ajustes salvos.");};
   document.getElementById("c_out").onclick=()=>auth.signOut();}
 
@@ -1000,7 +1187,7 @@ function gerarPDF(html, mode, nome){
 /* boot */
 function paintWho(){document.getElementById("whoName").textContent=S.config.nome||"Configurar";
   document.getElementById("whoAv").textContent=initials(S.config.nome);}
-function draw(){if(current==="atend")drawAtend();else if(current==="ordens")drawOrdens();else if(current==="ferr")drawFerr();else if(current==="cfg")drawCfg();}
+function draw(){if(current==="atend")drawAtend();else if(current==="ordens")drawOrdens();else if(current==="arm")drawArm();else if(current==="ferr")drawFerr();else if(current==="cfg")drawCfg();}
 document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>nav(b.dataset.t));
 let blurT=null;
 function isField(el){return el&&el.matches&&el.matches("input,textarea,select");}

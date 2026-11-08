@@ -22,7 +22,8 @@ Instruções para qualquer IA que trabalhe neste repositório. Ler antes de muda
 
 ## Técnico
 - `index.html` único, JS puro, sem build. Não introduzir framework nem bundler.
-- Firebase compat 11 (Auth Google + Firestore). Interface fala com o banco só por `repoLoadAll`, `saveConsultor`, `saveCliente`, `saveOrdemDoc`, `deleteOrdemDoc`.
+- Firebase compat 11 (Auth Google + Firestore). Interface fala com o banco só por `repoLoadAll`, `saveConsultor`, `saveCliente`, `saveOrdemDoc`, `deleteOrdemDoc`, `saveArmacao`, `deleteArmacao`.
+- Fotos de armações não vão para o Firebase (Storage exige plano pago): Drive → `ferramentas/fotos` → GitHub.
 - OS e recibo: html2pdf. **Nunca** voltar a `window.print()` (quebra no iOS).
 - Receita: teclado de calculadora com vírgula automática (padrão Pix) — aprovado; não mexer sem pedido.
 - Tela mostra vírgula; armazenamento usa ponto.

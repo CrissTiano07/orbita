@@ -3,7 +3,7 @@
 > Ponto de retomada. Ler **antes** de mexer no código.
 > Histórico e porquês: `CONTEXT_ORBITA 1.md` e `CONTEXT_ORBITA 2.md`. Regras fixas: `BUSINESS-RULES.md`.
 
-**Atualizado:** 07/11/2026
+**Atualizado:** 08/11/2026
 **Estado:** produção de teste, uso solo. Ainda **não** usado em atendimento real.
 **Stack:** `index.html` único · JS puro, sem build · Firebase compat 11 (Auth Google + Firestore, projeto `orbita-b2b55`, `southamerica-east1`) · html2pdf (OS/recibo) · GitHub Pages.
 
@@ -45,12 +45,14 @@ Testado em navegador headless (12 cenários, 0 erros). **Falta teste no iPhone r
 
 ## 2. Próximos passos (ordem)
 
-1. **Teste no aparelho real** da nova receita (iPhone + Android), aba anônima com `?v=N`.
-2. **Fotos de teste das armações** (≈5, luz difusa, celular fixo, armação de frente, fundo claro) → calibrar script de padronização.
-3. **Catálogo de armações** (ver §3).
-4. **Receita por foto** (ver §4).
+1. **Testar a aba Armações no iPhone** (cadastro, foto com nome da ref, lista, teto).
+2. **Fotos reais** (≈5) → calibrar o script **e** piloto comparativo: script × Cloudinary × @imgly no iPhone (§3.2).
+3. **Catálogo público** (página do cliente) lendo as armações + fotos do GitHub (§3).
+4. **Receita por foto** (§4).
 
-## 3. Catálogo de armações — planejado, não iniciado
+Receita (teclado) já testada e aprovada no iPhone em 08/11/2026.
+
+## 3. Catálogo de armações — cadastro entregue, página pública a fazer
 
 Página pública mobile-first para o cliente ver e escolher armações antes da prova em domicílio.
 Mockup aprovado (estética + UX) em 07/11/2026: catálogo, detalhe, seleção para provar e versão computador (canvas "Órbita — Catálogo de armações" no Claude).
@@ -61,9 +63,24 @@ Mockup aprovado (estética + UX) em 07/11/2026: catálogo, detalhe, seleção pa
 - **Medidas:** lente/ponte/haste (gravadas na haste, ex. 52□18-140) + largura total → P/M/G e filtro "cabe no meu rosto".
 - **Dados (proposta):** `armacoes/{ref}`, `reservas/{id}`, perfil do cliente. Leitura pública só de `armacoes`; escrita só pelo consultor; expiração de reserva e contadores no servidor.
 - **Script de fotos PRONTO (08/11/2026):** `ferramentas/fotos/padronizar.py` — IA rembg `isnet-general-use` (remove fundo e sombra), endireita até 15°, centraliza, fundo `#EFEEEB` + sombra de contato, WebP 1600/800/400 + PNG recortado, `relatorio.csv` e `contato.jpg`. Testado em 7 fotos sintéticas difíceis (`gerar_testes.py`): 7/7 OK. Ponto fraco: armação cristal mantém a lente acinzentada → fotografar em fundo cinza claro. **Falta calibrar com as 5 fotos reais.**
-- **Fotos:** cadastro com foto na mesma etapa (ref gerada → foto bruta salva com a ref → script Python padroniza em lote: Pillow + rembg, fundo neutro, centralizada, WebP em 3 tamanhos). Storage do Firebase já configurado.
+- **Fotos — decisão 08/11/2026:** Firebase Storage **não** é gratuito para o bucket novo (`*.firebasestorage.app` exige plano Blaze; no Spark dá erro 402/403). Decidido: **Drive como depósito das brutas + GitHub como vitrine** (pasta do repositório servida pelo Pages), custo zero, via PR. Fluxo: foto sai do celular com o nome da ref → Drive/Arquivos → script (Cristiano ou Claude) → PR com as WebP → merge → no ar.
 - **Integração com a OS:** campo "Armação" (hoje texto livre) passa a puxar do catálogo.
 - **Pagamento: fora do MVP.** Handoff de segurança: nunca guardar cartão; checkout hospedado (Mercado Pago / Pix); confirmação só por webhook validado no servidor.
+
+### 3.1 Aba Armações — entregue em 08/11/2026 (PR feat/cadastro-armacoes)
+- 5ª aba **Armações** na barra de baixo.
+- **Lista:** contador `n/teto`, filtros por status com contagem, busca (modelo, ref, cor, formato), status trocável na própria linha, ações foto · editar · excluir. Selo de foto: sem foto · aguardando tratamento · n fotos.
+- **Cadastro rápido:** ref automática sequencial `ORB-0001…` (`counters.armacao`, pula refs já usadas); modelo; formato em chips; medidas da haste com pulo automático (2/2/3 dígitos); largura total opcional; **tamanho P/M/G calculado** (≤129 P · 130–139 M · ≥140 G; sem largura total, estima 2×lente + ponte + 8 mm); material e cor em chips + "outra cor"; status; quantidade. **Sem preço** (decisão do Cristiano).
+- **Foto sem servidor:** depois de salvar, tela com a ref grande (para etiqueta) e 3 vistas (frente · lado · rosto). A câmera abre e o arquivo sai como `ORB-0042.jpg` / `ORB-0042_lado.jpg` pela folha de compartilhar (Arquivos/Drive) ou download. Marca a vista como `pendente` até o tratamento.
+- **Teto:** padrão 200 (Ajustes → Numeração). Aviso a 90%; no teto, "Nova armação" bloqueia.
+- **Dados:** `consultores/{uid}/armacoes/{ref}` via `saveArmacao` / `deleteArmacao`. Regra do Firestore atual (`consultores/{uid}/{document=**}`) já cobre — nada a mudar no console.
+- Testado em headless 390×844 e 1280×900 com Firebase simulado que grava/relê e rejeita `undefined`: cadastro, validação, pulo de campo, tamanho, edição, status, filtro, busca, teto, exclusão, foto com nome da ref — 0 erros. **Falta teste no iPhone real** (câmera + folha de compartilhar).
+
+### 3.2 Piloto de fotos (quando houver 5 fotos reais)
+- **Script** (`ferramentas/fotos`, rembg): testado 7/7 em sintéticas.
+- **Cloudinary (grátis, sem cartão):** remoção de fundo na nuvem custa 75 transformações por imagem (150 frentes ≈ 11 de 25 créditos/mês); salvar como transformação nomeada para cobrar uma vez; plano grátis suspende em vez de cobrar. Ponto fraco: upload sem servidor expõe o preset (restringir tipo/tamanho/pasta; trocar o nome se vazar).
+- **@imgly/background-removal (no navegador):** código aberto (AGPL), sem cota; modelo IS-Net baixado uma vez (~40–80 MB). Risco: memória/velocidade no iPhone.
+- Combinação candidata: @imgly no celular + armazenamento (GitHub ou Cloudinary só como storage). Decidir após comparar os recortes.
 
 ## 4. Receita por foto — próxima grande evolução
 
