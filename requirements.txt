@@ -1,0 +1,5 @@
+rembg[cpu]>=2.0.60
+pillow>=10
+numpy>=1.24
+# opcional, para fotos .heic do iPhone:
+# pillow-heif

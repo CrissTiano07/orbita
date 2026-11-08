@@ -60,6 +60,7 @@ Mockup aprovado (estética + UX) em 07/11/2026: catálogo, detalhe, seleção pa
 - **Status por armação:** disponível · em prova · indisponível (acinzentada no fim + "avise-me").
 - **Medidas:** lente/ponte/haste (gravadas na haste, ex. 52□18-140) + largura total → P/M/G e filtro "cabe no meu rosto".
 - **Dados (proposta):** `armacoes/{ref}`, `reservas/{id}`, perfil do cliente. Leitura pública só de `armacoes`; escrita só pelo consultor; expiração de reserva e contadores no servidor.
+- **Script de fotos PRONTO (08/11/2026):** `ferramentas/fotos/padronizar.py` — IA rembg `isnet-general-use` (remove fundo e sombra), endireita até 15°, centraliza, fundo `#EFEEEB` + sombra de contato, WebP 1600/800/400 + PNG recortado, `relatorio.csv` e `contato.jpg`. Testado em 7 fotos sintéticas difíceis (`gerar_testes.py`): 7/7 OK. Ponto fraco: armação cristal mantém a lente acinzentada → fotografar em fundo cinza claro. **Falta calibrar com as 5 fotos reais.**
 - **Fotos:** cadastro com foto na mesma etapa (ref gerada → foto bruta salva com a ref → script Python padroniza em lote: Pillow + rembg, fundo neutro, centralizada, WebP em 3 tamanhos). Storage do Firebase já configurado.
 - **Integração com a OS:** campo "Armação" (hoje texto livre) passa a puxar do catálogo.
 - **Pagamento: fora do MVP.** Handoff de segurança: nunca guardar cartão; checkout hospedado (Mercado Pago / Pix); confirmação só por webhook validado no servidor.
