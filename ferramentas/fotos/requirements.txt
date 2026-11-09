@@ -1,5 +1,6 @@
 rembg[cpu]>=2.0.60
 pillow>=10
 numpy>=1.24
+opencv-python-headless>=4.8   # remove o grão (opcional, recomendado)
 # opcional, para fotos .heic do iPhone:
 # pillow-heif

@@ -1,7 +1,7 @@
 """Órbita · padroniza fotos de armações para o catálogo.
 
 Pega a foto bruta do celular e entrega a foto de catálogo:
-  1. corrige a rotação do iPhone (EXIF)
+  1. corrige a rotação do iPhone (EXIF) e remove o grão de pouca luz
   2. remove o fundo e a sombra (IA: rembg, modelo isnet-general-use)
   3. endireita a armação torta (frente)
   4. centraliza e põe sempre na mesma escala
@@ -39,6 +39,7 @@ OCUPA_LARG = {"frente": 0.78, "lado": 0.84, "rosto": 0.90}  # largura da armaç�
 OCUPA_ALT = 0.62            # teto de altura (armações muito altas)
 GIRO_MAX = 15               # graus: acima disso, não endireita (provável foto de lado)
 MAX_ENTRADA = 2400          # reduz a foto bruta antes da IA (rapidez, sem perda visível)
+GRAO_MIN = 1.2              # só remove grão acima deste nível (foto de dia ≈ 0,7; noturna ≈ 2)
 EXTENSOES = {".jpg", ".jpeg", ".png", ".heic", ".webp"}
 VISTAS = {"frente", "lado", "rosto"}
 
@@ -72,6 +73,31 @@ def abrir(arq):
             raise RuntimeError("foto .heic: instale pillow-heif ou exporte como JPG")
     img = ImageOps.exif_transpose(Image.open(arq)).convert("RGB")
     img.thumbnail((MAX_ENTRADA, MAX_ENTRADA), Image.LANCZOS)
+    return tirar_grao(img)
+
+
+def nivel_grao(img):
+    """Estima o ruído da foto (desvio robusto do Laplaciano). Foto de dia ≈ 0,7; noturna ≈ 2."""
+    import cv2
+    a = np.array(img.convert("L")).astype(np.float32)
+    lap = cv2.Laplacian(a, cv2.CV_32F)
+    return float(np.median(np.abs(lap - np.median(lap))) * 1.4826 / math.sqrt(20))
+
+
+def tirar_grao(img):
+    """Remove o grão de foto com pouca luz, só quando há grão. Sem isso, o grão vira 'pontilhado'
+    dentro da lente transparente depois do recorte (achado com a 1ª foto real, ORB-0001).
+    Em foto limpa não mexe: suavizar à toa faz a IA tratar lente como parte da armação."""
+    try:
+        import cv2
+    except ImportError:
+        return img  # sem OpenCV, segue sem esta etapa
+    g = nivel_grao(img)
+    if g < GRAO_MIN:
+        return img
+    h = min(10, round(3 * g))
+    img = Image.fromarray(cv2.fastNlMeansDenoisingColored(np.array(img), None, h, h, 7, 21))
+    img.info["grao"] = g
     return img
 
 
@@ -156,6 +182,8 @@ def processar(arq, saida, fundo, sombra):
     if bx is None:
         return ref, vista, "ERRO", "armação não encontrada", 0.0, time.time() - t, None
     av = avisos_de(img, bx)
+    if img.info.get("grao"):
+        av.append(f"foto com grão ({img.info['grao']:.1f}): removi; prefira luz de dia")
     rec = rec.crop(bx)
     giro = 0.0
     if vista == "frente":
