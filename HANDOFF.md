@@ -73,8 +73,9 @@ Mockup aprovado (estética + UX) em 07/11/2026: catálogo, detalhe, seleção pa
 - **Cadastro rápido:** ref automática sequencial `ORB-0001…` (`counters.armacao`, pula refs já usadas); modelo; formato em chips; medidas da haste com pulo automático (2/2/3 dígitos); largura total opcional; **tamanho P/M/G calculado** (≤129 P · 130–139 M · ≥140 G; sem largura total, estima 2×lente + ponte + 8 mm); material e cor em chips + "outra cor"; status; quantidade. **Sem preço** (decisão do Cristiano).
 - **Foto sem servidor:** depois de salvar, tela com a ref grande (para etiqueta) e 3 vistas (frente · lado · rosto). A câmera abre e o arquivo sai como `ORB-0042.jpg` / `ORB-0042_lado.jpg` pela folha de compartilhar (Arquivos/Drive) ou download. Marca a vista como `pendente` até o tratamento.
 - **Status da foto:** `""` sem foto · `"pendente"` foto bruta tirada no app · `"ok"` foto tratada no ar. **Fonte da verdade: `catalogo/fotos/index.json`** (lista ref → vistas). O app lê o índice 1 vez (cache 2 min) e marca `ok` todas as vistas listadas — inclusive fotos que chegaram por fora do app — e volta para "sem foto" se a vista sair do índice. Substituiu a checagem foto a foto (1 consulta em vez de centenas).
+- **Grade de produto (08/11/2026, referência Mercado Livre / OLX / Pinterest):** a lista virou grade — 2 colunas no celular, 3 no computador; foto quadrada ocupa a largura do card, texto e selo de status embaixo. Miniatura `_mini` agora 480 px (nítida em tela retina). Selos curtos: "2 fotos" · "aguardando" · "sem foto".
 - **Card sem linha de botões (08/11/2026):** tocar no card → editar · tocar na miniatura → fotos · status é um selo colorido tocável (dropdown nativo) · **excluir saiu da lista** e fica no fim da tela de edição, com confirmação. Card ~2× mais compacto e sem risco de excluir por engano.
-- **Lista:** miniatura em coluna própria (96 px celular / 120 px computador), separada dos botões; toque nela abre as fotos; sem foto mostra marcador "sem foto". Usa `{vista}_mini.webp` (240 px, armação ocupa ~94% do quadro), com recuo para `_400` se a mini faltar.
+- **Lista (versão anterior, substituída pela grade):** miniatura em coluna própria, separada dos botões; toque nela abre as fotos; sem foto mostra marcador "sem foto". Usa `{vista}_mini.webp` (240 px, armação ocupa ~94% do quadro), com recuo para `_400` se a mini faltar.
 - **Publicar fotos tratadas:** `python ferramentas/fotos/padronizar.py fotos_brutas fotos_catalogo` → `python ferramentas/fotos/publicar.py fotos_catalogo` (copia só WebP para `catalogo/fotos/` e refaz o `index.json`) → PR → merge.
 - **Teto:** padrão 200 (Ajustes → Numeração). Aviso a 90%; no teto, "Nova armação" bloqueia.
 - **Dados:** `consultores/{uid}/armacoes/{ref}` via `saveArmacao` / `deleteArmacao`. Regra do Firestore atual (`consultores/{uid}/{document=**}`) já cobre — nada a mudar no console.
@@ -87,6 +88,8 @@ Mockup aprovado (estética + UX) em 07/11/2026: catálogo, detalhe, seleção pa
 - **Cloudinary (grátis, sem cartão):** remoção de fundo na nuvem custa 75 transformações por imagem (150 frentes ≈ 11 de 25 créditos/mês); salvar como transformação nomeada para cobrar uma vez; plano grátis suspende em vez de cobrar. Ponto fraco: upload sem servidor expõe o preset (restringir tipo/tamanho/pasta; trocar o nome se vazar).
 - **@imgly/background-removal (no navegador):** código aberto (AGPL), sem cota; modelo IS-Net baixado uma vez (~40–80 MB). Risco: memória/velocidade no iPhone.
 - Combinação candidata: @imgly no celular + armazenamento (GitHub ou Cloudinary só como storage). Decidir após comparar os recortes.
+
+**Lição de fluxo (08/11/2026):** PR mesclado não recebe mais commits — o PR #6 foi mesclado antes do ajuste do card chegar; virou o PR #7. Ao ajustar um PR aberto, avisar "não mescle ainda".
 
 ## 4. Receita por foto — próxima grande evolução
 

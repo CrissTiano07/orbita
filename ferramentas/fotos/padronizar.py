@@ -34,7 +34,7 @@ from PIL import Image, ImageFilter, ImageOps
 # ---- padrões do catálogo (mudar aqui muda o catálogo inteiro) ----
 LADO = 1600                 # quadrado final, px
 TAMANHOS = (1600, 800, 400)  # WebP gerados
-MINI = 240                  # miniatura justa para a lista do app (vista_mini.webp)
+MINI = 480                  # miniatura justa para a grade do app (vista_mini.webp; nítida em tela retina)
 QUALIDADE = 85
 FUNDO = "#EFEEEB"           # neutro claro (mesma família do mockup aprovado)
 OCUPA_LARG = {"frente": 0.78, "lado": 0.84, "rosto": 0.90}  # largura da armação / quadro
