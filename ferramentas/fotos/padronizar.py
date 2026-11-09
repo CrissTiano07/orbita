@@ -3,6 +3,7 @@
 Pega a foto bruta do celular e entrega a foto de catálogo:
   1. corrige a rotação do iPhone (EXIF) e remove o grão de pouca luz
   2. remove o fundo e a sombra (IA: rembg, modelo isnet-general-use)
+     e corrige cor/exposição usando o papel como referência neutra
   3. endireita a armação torta (frente)
   4. centraliza e põe sempre na mesma escala
   5. aplica fundo neutro + sombra de contato suave
@@ -39,6 +40,8 @@ OCUPA_LARG = {"frente": 0.78, "lado": 0.84, "rosto": 0.90}  # largura da armaç�
 OCUPA_ALT = 0.62            # teto de altura (armações muito altas)
 GIRO_MAX = 15               # graus: acima disso, não endireita (provável foto de lado)
 MAX_ENTRADA = 2400          # reduz a foto bruta antes da IA (rapidez, sem perda visível)
+PAPEL = 0.93                # brilho-alvo do papel depois da correção (0–1)
+NITIDEZ = (0.8, 60, 2)      # UnsharpMask (raio, %, limiar) aplicado em cada tamanho final
 GRAO_MIN = 1.2              # só remove grão acima deste nível (foto de dia ≈ 0,7; noturna ≈ 2)
 EXTENSOES = {".jpg", ".jpeg", ".png", ".heic", ".webp"}
 VISTAS = {"frente", "lado", "rosto"}
@@ -120,6 +123,25 @@ def recortar(img):
     return rgba
 
 
+def corrigir_cor(img, rgba):
+    """Balanço de branco e exposição usando o próprio papel como referência (como um cartão cinza):
+    o fundo que a IA descartou deveria ser neutro e claro. Tira o tom amarelado/azulado da lâmpada
+    e deixa o preto da armação preto de verdade. Devolve o recorte com as cores corrigidas."""
+    rgb = np.array(img).astype(np.float32) / 255
+    a = np.array(rgba.split()[-1])
+    fundo = a < 5
+    if fundo.mean() < 0.05:  # quase sem fundo visível: não arrisca
+        return rgba, None
+    med = np.median(rgb[fundo], axis=0)
+    alvo = float(med.mean())
+    ganho = np.clip(alvo / np.maximum(med, 1e-3), 0.8, 1.25)        # neutraliza o tom
+    expo = float(np.clip(PAPEL / max(alvo, 1e-3), 0.85, 1.6))         # papel vira branco-claro
+    out = np.clip(rgb * ganho * expo, 0, 1)
+    novo = Image.fromarray((out * 255 + 0.5).astype(np.uint8)).convert("RGBA")
+    novo.putalpha(rgba.split()[-1])
+    return novo, (med * 255).round().astype(int)
+
+
 def caixa(rgba, limiar=40):
     a = np.array(rgba.split()[-1]) > limiar
     ys, xs = np.where(a)
@@ -178,6 +200,7 @@ def processar(arq, saida, fundo, sombra):
     t = time.time()
     img = abrir(arq)
     rec = recortar(img)
+    rec, tom = corrigir_cor(img, rec)
     bx = caixa(rec)
     if bx is None:
         return ref, vista, "ERRO", "armação não encontrada", 0.0, time.time() - t, None
@@ -199,6 +222,7 @@ def processar(arq, saida, fundo, sombra):
     pasta.mkdir(parents=True, exist_ok=True)
     for tam in TAMANHOS:
         im = final if tam == LADO else final.resize((tam, tam), Image.LANCZOS)
+        im = im.filter(ImageFilter.UnsharpMask(*NITIDEZ))
         im.save(pasta / f"{vista}_{tam}.webp", "WEBP", quality=QUALIDADE, method=6)
     rec.save(pasta / f"{vista}_recorte.png")
     status = "AVISO" if av else "OK"
