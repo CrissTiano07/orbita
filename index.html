@@ -308,6 +308,20 @@
   .arm .armst .status[data-s="disponivel"]{background-color:var(--acc-bg);color:var(--acc-d)}
   .arm .armst .status[data-s="prova"]{background-color:#fff1cc;color:#7a5000}
   .arm .armst .status[data-s="indisponivel"]{background-color:#eceeec;color:#5c6268}
+  .armzoom{position:fixed;inset:0;z-index:30;background:#111;color:#fff;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+  .armzoom[hidden]{display:none}
+  .armzoom .zhd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 16px;font-size:14px}
+  .armzoom .zt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .armzoom .zx{background:none;border:0;color:#fff;font-size:30px;min-width:48px;min-height:48px;cursor:pointer}
+  .armzoom .zimg{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#efeeeb}
+  .armzoom .zimg img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .2s ease;cursor:zoom-in;touch-action:manipulation}
+  .armzoom .zimg img.zoom{transform:scale(2.5);cursor:zoom-out}
+  .armzoom .zft{padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .armzoom .ztabs{display:flex;gap:8px}
+  .armzoom .ztabs button{background:#2a2a2a;color:#ddd;border:0;border-radius:18px;min-height:40px;padding:0 16px;font-family:var(--sans);font-size:14px;cursor:pointer}
+  .armzoom .ztabs button.on{background:#fff;color:#111;font-weight:600}
+  .armzoom .zdica{font-size:12px;color:#aaa}
+  .armzoom .zger{width:100%;max-width:420px}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .armdel{text-align:center;margin:-2px 0 8px}
   .armdel .btn{color:var(--err);font-weight:600}
@@ -982,6 +996,24 @@ async function armSyncFotos(onChange){const agora=Date.now();
     if(m){a.atualizada=new Date().toISOString();saveArmacao(a);mudou=true;}});
   if(mudou&&onChange)onChange();}
 function armMiniVista(a){const f=a.foto||{};return ARM_VISTAS.map(([v])=>v).find(v=>f[v]==="ok")||"";}
+/* ampliar foto: toque na foto da grade abre em tela cheia (1600 px) para conferir defeitos;
+   toque na imagem alterna zoom 2,5x no ponto tocado; abas trocam a vista; "Gerenciar fotos" leva à tela de fotos */
+function armZoom(a,vista){let z=document.getElementById("armZoom");
+  if(!z){z=document.createElement("div");z.id="armZoom";z.className="armzoom";z.setAttribute("role","dialog");z.setAttribute("aria-modal","true");document.body.appendChild(z);}
+  const vs=ARM_VISTAS.filter(([v])=>(a.foto||{})[v]==="ok");
+  z.innerHTML=`<div class="zhd"><div class="zt"><b>${esc(a.ref)}</b> · ${esc(a.modelo||"")}</div><button class="zx" aria-label="Fechar">\u00d7</button></div>
+    <div class="zimg"><img alt="${esc(a.modelo||a.ref)} — ${vista}" src="${armFotoUrl(a.ref,vista,1600)}"></div>
+    <div class="zft">${vs.length>1?`<div class="ztabs">${vs.map(([v,l])=>`<button class="${v===vista?"on":""}" data-v="${v}">${l}</button>`).join("")}</div>`:""}
+      <div class="zdica">Toque na foto para aproximar</div>
+      <button class="btn sec zger">Gerenciar fotos</button></div>`;
+  z.hidden=false;document.body.style.overflow="hidden";
+  const img=z.querySelector("img"),fechar=()=>{z.hidden=true;document.body.style.overflow="";document.removeEventListener("keydown",esc_);};
+  const esc_=e=>{if(e.key==="Escape")fechar();};document.addEventListener("keydown",esc_);
+  img.onclick=e=>{const r=img.getBoundingClientRect();
+    if(img.classList.toggle("zoom")){img.style.transformOrigin=((e.clientX-r.left)/r.width*100)+"% "+((e.clientY-r.top)/r.height*100)+"%";}};
+  z.querySelector(".zx").onclick=fechar;
+  z.querySelector(".zger").onclick=()=>{fechar();armFotoRef=a.ref;armView="foto";drawArm();window.scrollTo(0,0);};
+  z.querySelectorAll(".ztabs button").forEach(b=>b.onclick=()=>armZoom(a,b.dataset.v));}
 function armAtivas(){return S.armacoes.length;}
 function blankArm(){return{ref:armNextRef(),modelo:"",formato:"",lente:"",ponte:"",haste:"",total:"",material:"",cor:"",
   status:"disponivel",qtd:1,foto:{frente:"",lado:"",rosto:""},novo:true};}
@@ -1019,6 +1051,7 @@ function drawArmList(){const teto=armTeto(),n=armAtivas(),cheio=n>=teto,perto=!c
         <label class="armst"><span class="sr">Status de ${esc(a.ref)}</span><select class="status" data-s="${a.status}">${ARM_STATUS.map(([k,l])=>`<option value="${k}" ${a.status===k?"selected":""}>${l}</option>`).join("")}</select></label></div>`;
       el.querySelector(".status").addEventListener("change",e=>{a.status=e.target.value;e.target.dataset.s=a.status;a.atualizada=new Date().toISOString();saveArmacao(a);haptic();toast(a.ref+": "+armStatusLabel(a.status));});
       el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const k=b.dataset.a;
+        if(k==="foto"&&armMiniVista(a)){armZoom(a,armMiniVista(a));return;}
         if(k==="foto"){armFotoRef=a.ref;armView="foto";drawArm();window.scrollTo(0,0);}
         else if(k==="edit"){armForm=JSON.parse(JSON.stringify(a));armForm.novo=false;armView="form";drawArm();window.scrollTo(0,0);}});
       box.appendChild(el);});};
