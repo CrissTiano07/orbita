@@ -3,12 +3,12 @@
 Transforma a foto do celular na foto padronizada do catálogo de armações.
 
 ## O que faz
-1. Corrige a rotação do iPhone
-2. Remove fundo e sombra (IA, roda no seu computador ou no Colab)
+1. Corrige a rotação do iPhone e remove grão de foto noturna
+2. Remove fundo e sombra (IA, roda no seu computador ou no Colab) e corrige cor/exposição pelo papel
 3. Endireita armação torta (até 15°)
 4. Centraliza, mesma escala em todas
 5. Fundo neutro `#EFEEEB` + sombra de contato suave
-6. Salva WebP 1600 / 800 / 400 + recorte PNG transparente
+6. Salva WebP 1600 / 800 / 400 + miniatura justa (`_mini`, 240 px) + recorte PNG transparente
 7. `relatorio.csv` + `contato.jpg` para conferir tudo de uma olhada
 
 ## Como fotografar
@@ -50,6 +50,12 @@ fotos_catalogo/
   contato.jpg     ← todas lado a lado para conferir
 ```
 AVISO não trava o lote: armação encostando na borda, pequena na foto, ou torta demais.
+
+## Publicar no catálogo
+```
+python ferramentas/fotos/publicar.py fotos_catalogo    # na raiz do repositório
+```
+Copia só os WebP para `catalogo/fotos/` e refaz `catalogo/fotos/index.json` — a lista que o app lê para marcar "no catálogo". Depois: PR → merge.
 
 ## Testar sem fotos reais
 `python gerar_testes.py` cria 7 fotos sintéticas difíceis (sombra, luz desigual, torta, EXIF, cristal).

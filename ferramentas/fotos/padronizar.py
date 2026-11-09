@@ -7,7 +7,7 @@ Pega a foto bruta do celular e entrega a foto de catálogo:
   3. endireita a armação torta (frente)
   4. centraliza e põe sempre na mesma escala
   5. aplica fundo neutro + sombra de contato suave
-  6. salva WebP em 3 tamanhos (1600 / 800 / 400) + recorte PNG transparente
+  6. salva WebP em 3 tamanhos (1600 / 800 / 400) + miniatura justa (mini) + recorte PNG transparente
   7. gera relatorio.csv e contato.jpg (folha para conferir tudo de uma vez)
 
 Nome do arquivo = ref da armação (o mesmo do cadastro):
@@ -34,6 +34,7 @@ from PIL import Image, ImageFilter, ImageOps
 # ---- padrões do catálogo (mudar aqui muda o catálogo inteiro) ----
 LADO = 1600                 # quadrado final, px
 TAMANHOS = (1600, 800, 400)  # WebP gerados
+MINI = 240                  # miniatura justa para a lista do app (vista_mini.webp)
 QUALIDADE = 85
 FUNDO = "#EFEEEB"           # neutro claro (mesma família do mockup aprovado)
 OCUPA_LARG = {"frente": 0.78, "lado": 0.84, "rosto": 0.90}  # largura da armação / quadro
@@ -167,18 +168,19 @@ def inclinacao(rgba):
     return math.degrees(math.atan2(y2 - y1, x2 - x1))
 
 
-def compor(recorte, vista, fundo, sombra):
+def compor(recorte, vista, fundo, sombra, lado=LADO, ocupa=None):
     larg, alt = recorte.size
-    escala = min(LADO * OCUPA_LARG[vista] / larg, LADO * OCUPA_ALT / alt)
+    oc = ocupa or OCUPA_LARG[vista]
+    escala = min(lado * oc / larg, lado * max(OCUPA_ALT, oc * 0.8) / alt)
     arm = recorte.resize((max(1, round(larg * escala)), max(1, round(alt * escala))), Image.LANCZOS)
-    quadro = Image.new("RGBA", (LADO, LADO), fundo)
-    x, y = (LADO - arm.width) // 2, (LADO - arm.height) // 2
+    quadro = Image.new("RGBA", (lado, lado), fundo)
+    x, y = (lado - arm.width) // 2, (lado - arm.height) // 2
     if sombra:
         # sombra de contato: discreta, deslocada para baixo — dá profundidade sem "sujar"
         a = np.array(arm.split()[-1]).astype(np.float32) * 0.16
         s = Image.new("RGBA", arm.size, (40, 36, 32, 0))
-        s.putalpha(Image.fromarray(a.astype(np.uint8)).filter(ImageFilter.GaussianBlur(LADO * 0.008)))
-        quadro.alpha_composite(s, (x, y + round(LADO * 0.012)))
+        s.putalpha(Image.fromarray(a.astype(np.uint8)).filter(ImageFilter.GaussianBlur(lado * 0.008)))
+        quadro.alpha_composite(s, (x, y + round(lado * 0.012)))
     quadro.alpha_composite(arm, (x, y))
     return quadro.convert("RGB")
 
@@ -224,6 +226,9 @@ def processar(arq, saida, fundo, sombra):
         im = final if tam == LADO else final.resize((tam, tam), Image.LANCZOS)
         im = im.filter(ImageFilter.UnsharpMask(*NITIDEZ))
         im.save(pasta / f"{vista}_{tam}.webp", "WEBP", quality=QUALIDADE, method=6)
+    # miniatura justa para a lista do app: armação ocupa quase todo o quadro
+    mini = compor(rec, vista, fundo, sombra, lado=MINI, ocupa=0.94).filter(ImageFilter.UnsharpMask(*NITIDEZ))
+    mini.save(pasta / f"{vista}_mini.webp", "WEBP", quality=QUALIDADE, method=6)
     rec.save(pasta / f"{vista}_recorte.png")
     status = "AVISO" if av else "OK"
     return ref, vista, status, "; ".join(av), giro, time.time() - t, final
