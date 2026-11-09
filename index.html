@@ -281,6 +281,10 @@
   .armvistas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
   .armvista{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:96px;border:1.5px dashed var(--line);border-radius:var(--r);cursor:pointer;text-align:center;padding:10px 6px;background:var(--surf2)}
   .armvista .t{font-weight:600;font-size:15px} .armvista .s{font-size:12px;color:var(--mut)}
+  .armvthumb{width:100%;max-width:90px;aspect-ratio:1;object-fit:cover;border-radius:10px;margin:2px 0}
+  .armpasso{margin-top:12px;font-size:13px;line-height:1.45;color:#5e4a00;background:#fff8e6;border-radius:var(--rf);padding:11px 13px;text-align:left}
+  .arm{position:relative}
+  .armthumb{float:right;width:64px;height:64px;object-fit:cover;border-radius:12px;margin:0 0 6px 10px;background:#efeeeb}
   .armvista.feita{border-style:solid;border-color:var(--acc);background:var(--acc-tint)} .armvista.feita .s{color:var(--acc-d)}
   .empty{border:1px dashed var(--line);border-radius:var(--r);padding:36px 18px;text-align:center;color:var(--mut);font-size:14px}
 
@@ -929,9 +933,20 @@ function armTotal(a){const t=parseInt(a.total);if(t>0)return{mm:t,est:false};
 function armTamanho(a){const t=armTotal(a).mm;if(!t)return "";return t<=129?"P":t<=139?"M":"G";}
 function armMedidas(a){return (a.lente||"—")+"□"+(a.ponte||"—")+"-"+(a.haste||"—");}
 function armStatusLabel(s){return (ARM_STATUS.find(x=>x[0]===s)||["","—"])[1];}
-function armFotoInfo(a){const f=a.foto||{},n=ARM_VISTAS.filter(([v])=>f[v]).length;
-  if(!n)return{cls:"no",txt:"sem foto"};
-  const pend=ARM_VISTAS.some(([v])=>f[v]==="pendente");return pend?{cls:"pend",txt:"foto aguardando tratamento"}:{cls:"ok",txt:n+" foto"+(n>1?"s":"")};}
+function armFotoInfo(a){const f=a.foto||{},ok=ARM_VISTAS.filter(([v])=>f[v]==="ok").length,pend=ARM_VISTAS.filter(([v])=>f[v]==="pendente").length;
+  if(!ok&&!pend)return{cls:"no",txt:"sem foto"};
+  if(pend)return{cls:"pend",txt:(ok?ok+" no catálogo · ":"")+pend+" aguardando tratamento"};
+  return{cls:"ok",txt:ok+" foto"+(ok>1?"s":"")+" no catálogo"};}
+/* fotos tratadas ficam no próprio site (GitHub Pages): catalogo/fotos/ORB-0042/frente_400.webp
+   O app verifica sozinho: quando a foto tratada entra no ar, "aguardando" vira "no catálogo". */
+const ARM_FOTO_BASE="catalogo/fotos/";
+function armFotoUrl(ref,v,tam){return ARM_FOTO_BASE+encodeURIComponent(ref)+"/"+v+"_"+(tam||400)+".webp";}
+const armProbe={};
+function armSyncFotos(onChange){const agora=Date.now();
+  S.armacoes.forEach(a=>{const f=a.foto||{};ARM_VISTAS.forEach(([v])=>{if(f[v]!=="pendente")return;
+    const k=a.ref+"/"+v;if(armProbe[k]&&agora-armProbe[k]<120000)return;armProbe[k]=agora;
+    const img=new Image();img.onload=()=>{if(a.foto[v]!=="pendente")return;a.foto[v]="ok";a.atualizada=new Date().toISOString();saveArmacao(a);if(onChange)onChange();};
+    img.src=armFotoUrl(a.ref,v,400)+"?t="+agora;});});}
 function armAtivas(){return S.armacoes.length;}
 function blankArm(){return{ref:armNextRef(),modelo:"",formato:"",lente:"",ponte:"",haste:"",total:"",material:"",cor:"",
   status:"disponivel",qtd:1,foto:{frente:"",lado:"",rosto:""},novo:true};}
@@ -957,7 +972,8 @@ function drawArmList(){const teto=armTeto(),n=armAtivas(),cheio=n>=teto,perto=!c
     if(!list.length){box.innerHTML='<div class="empty">Nada encontrado.</div>';return;}
     box.innerHTML="";
     list.forEach(a=>{const fi=armFotoInfo(a),tam=armTamanho(a),el=document.createElement("div");el.className="ord arm";
-      el.innerHTML=`<div class="id">${esc(a.ref)}${tam?` <span class="tam">${tam}</span>`:""} <span class="foto ${fi.cls}">${fi.txt}</span></div>
+      const thumb=a.foto&&a.foto.frente==="ok"?`<img class="armthumb" src="${armFotoUrl(a.ref,"frente",400)}" alt="" loading="lazy">`:"";
+      el.innerHTML=`${thumb}<div class="id">${esc(a.ref)}${tam?` <span class="tam">${tam}</span>`:""} <span class="foto ${fi.cls}">${fi.txt}</span></div>
         <div class="nm">${esc(a.modelo||"Sem nome")}</div>
         <div class="meta">${esc(a.formato||"—")} · <span class="mono">${esc(armMedidas(a))}</span>${a.material?" · "+esc(a.material):""}${a.cor?" · "+esc(a.cor):""}${(parseInt(a.qtd)||1)>1?" · "+a.qtd+" un.":""}</div>
         <div class="ctrl"><select class="status" data-s="${a.status}" aria-label="Status de ${esc(a.ref)}">${ARM_STATUS.map(([k,l])=>`<option value="${k}" ${a.status===k?"selected":""}>${l}</option>`).join("")}</select>
@@ -969,7 +985,8 @@ function drawArmList(){const teto=armTeto(),n=armAtivas(),cheio=n>=teto,perto=!c
         else if(k==="del"){if(confirm("Excluir "+a.ref+" ("+(a.modelo||"sem nome")+")?")){S.armacoes=S.armacoes.filter(x=>x.ref!==a.ref);deleteArmacao(a.ref);drawArmList();toast(a.ref+" excluída.");}}});
       box.appendChild(el);});};
   render();
-  document.getElementById("armSearch").addEventListener("input",e=>{armBusca=e.target.value;render();});}
+  document.getElementById("armSearch").addEventListener("input",e=>{armBusca=e.target.value;render();});
+  armSyncFotos(()=>{if(current==="arm"&&armView==="list"&&document.getElementById("armList"))render();});}
 
 function armChips(id,opts,val){return `<div class="chips" id="${id}">${opts.map(o=>`<button type="button" class="chip ${val===o?"on":""}" data-v="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;}
 function armTamTxt(){const a=armForm,t=armTotal(a),tam=armTamanho(a);if(!tam)return "Preencha lente e ponte para calcular o tamanho.";
@@ -1044,8 +1061,9 @@ function drawArmFoto(){const a=S.armacoes.find(x=>x.ref===armFotoRef);if(!a){arm
       <p class="hint">Fundo claro e liso, luz de janela, celular apoiado, armação de frente com as hastes abertas.</p>
       <div class="armvistas">${ARM_VISTAS.map(([v,l])=>`<label class="armvista ${f[v]?"feita":""}">
         <input type="file" accept="image/*" capture="environment" data-v="${v}" hidden>
-        <span class="t">${l}</span><span class="s">${f[v]==="pendente"?"tirada · aguardando tratamento":f[v]?"no catálogo":"tirar foto"}</span></label>`).join("")}</div>
-      <p class="hint" style="margin:12px 0 0">Depois de tirar, salve em <b>Arquivos</b> ou no <b>Drive</b>, na pasta <i>fotos_brutas</i>.</p></div>
+        <span class="t">${l}</span>${f[v]==="ok"?`<img class="armvthumb" src="${armFotoUrl(a.ref,v,400)}" alt="">`:""}<span class="s">${f[v]==="ok"?"no catálogo · trocar":f[v]==="pendente"?"tirada · aguardando tratamento":"tirar foto"}</span></label>`).join("")}</div>
+      <p class="hint" style="margin:12px 0 0">Depois de tirar, salve em <b>Arquivos</b> ou no <b>Drive</b>, na pasta <i>fotos_brutas</i>.</p>
+      <div class="armpasso"><b>"Aguardando tratamento" é normal.</b> A foto bruta ainda precisa passar pelo script (fundo, escala). Quando a foto tratada entrar no site, o aviso muda sozinho para <b>no catálogo</b>.</div></div>
     <div class="armsave armduo"><button class="btn sec" id="armFim">Concluir</button><button class="btn pri" id="armProx" ${armAtivas()>=armTeto()?"disabled":""}>+ Próxima</button></div>`;
   document.getElementById("armVoltar").onclick=document.getElementById("armFim").onclick=()=>{armView="list";drawArm();window.scrollTo(0,0);};
   document.getElementById("armProx").onclick=()=>{armForm=blankArm();armView="form";drawArm();window.scrollTo(0,0);};
