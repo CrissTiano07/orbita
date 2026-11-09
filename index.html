@@ -284,13 +284,25 @@
   .armvthumb{width:100%;max-width:90px;aspect-ratio:1;object-fit:cover;border-radius:10px;margin:2px 0}
   .armpasso{margin-top:12px;font-size:13px;line-height:1.45;color:#5e4a00;background:#fff8e6;border-radius:var(--rf);padding:11px 13px;text-align:left}
   .arm{position:relative}
-  .armtop{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center}
+  .armtop{display:grid;grid-template-columns:96px minmax(0,1fr);grid-template-areas:"th info" "th st";column-gap:14px;row-gap:8px;align-items:center}
+  .armtop .armthumb{grid-area:th}
+  .arminfo{grid-area:info;display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:none;border:0;padding:0 26px 0 0;font:inherit;color:inherit;cursor:pointer;position:relative;width:100%}
+  .arminfo .chev{position:absolute;right:0;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--dim)}
+  .arminfo .id{font-family:var(--mono);font-size:12px;color:var(--acc-d)}
+  .armst{grid-area:st;justify-self:start}
+  .armst .status{appearance:none;-webkit-appearance:none;border:0;border-radius:16px;padding:7px 30px 7px 13px;font-family:var(--sans);font-size:13px;font-weight:600;min-height:36px;cursor:pointer;
+    background-repeat:no-repeat;background-position:right 10px center;background-size:12px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+  .arm .armst .status[data-s="disponivel"]{background-color:var(--acc-bg);color:var(--acc-d)}
+  .arm .armst .status[data-s="prova"]{background-color:#fff1cc;color:#7a5000}
+  .arm .armst .status[data-s="indisponivel"]{background-color:#eceeec;color:#5c6268}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .armdel{text-align:center;margin:-2px 0 8px}
+  .armdel .btn{color:var(--err);font-weight:600}
   .armthumb{width:96px;height:96px;border-radius:14px;border:1px dashed var(--line);background:var(--surf2);padding:0;overflow:hidden;cursor:pointer;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--dim);font-family:var(--sans);font-size:11px}
   .armthumb svg{width:34px;height:34px}
   .armthumb.tem{border:0;background:#efeeeb}
   .armthumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .arminfo{min-width:0}
   .arminfo .foto{display:inline-block;margin:4px 0 0 0}
   @media(min-width:540px){.armtop{grid-template-columns:120px minmax(0,1fr)}.armthumb{width:120px;height:120px}}
   .armvista.feita{border-style:solid;border-color:var(--acc);background:var(--acc-tint)} .armvista.feita .s{color:var(--acc-d)}
@@ -992,16 +1004,16 @@ function drawArmList(){const teto=armTeto(),n=armAtivas(),cheio=n>=teto,perto=!c
       const mv=armMiniVista(a);
       const thumb=mv?`<img src="${armFotoUrl(a.ref,mv,"mini")}" alt="Foto de ${esc(a.modelo||a.ref)}" loading="lazy" onerror="this.onerror=null;this.src='${armFotoUrl(a.ref,mv,400)}'">`
         :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="14" r="3.6"/><circle cx="17" cy="14" r="3.6"/><path d="M10.6 13.4q1.4-1 2.8 0"/></svg><span>sem foto</span>`;
-      el.innerHTML=`<div class="armtop"><button type="button" class="armthumb ${mv?"tem":""}" data-a="foto" aria-label="Fotos de ${esc(a.ref)}">${thumb}</button><div class="arminfo"><div class="id">${esc(a.ref)}${tam?` <span class="tam">${tam}</span>`:""} <span class="foto ${fi.cls}">${fi.txt}</span></div>
-        <div class="nm">${esc(a.modelo||"Sem nome")}</div>
-        <div class="meta">${esc(a.formato||"—")} · <span class="mono">${esc(armMedidas(a))}</span>${a.material?" · "+esc(a.material):""}${a.cor?" · "+esc(a.cor):""}${(parseInt(a.qtd)||1)>1?" · "+a.qtd+" un.":""}</div></div></div>
-        <div class="ctrl"><select class="status" data-s="${a.status}" aria-label="Status de ${esc(a.ref)}">${ARM_STATUS.map(([k,l])=>`<option value="${k}" ${a.status===k?"selected":""}>${l}</option>`).join("")}</select>
-          <button class="icobtn" data-a="foto">foto</button><button class="icobtn" data-a="edit">editar</button><button class="icobtn del" data-a="del">excluir</button></div>`;
-      el.querySelector(".status").addEventListener("change",e=>{a.status=e.target.value;e.target.dataset.s=a.status;a.atualizada=new Date().toISOString();saveArmacao(a);});
+      el.innerHTML=`<div class="armtop"><button type="button" class="armthumb ${mv?"tem":""}" data-a="foto" aria-label="Fotos de ${esc(a.ref)}">${thumb}</button>
+        <button type="button" class="arminfo" data-a="edit" aria-label="Editar ${esc(a.ref)} ${esc(a.modelo||"")}"><span class="id">${esc(a.ref)}${tam?` <span class="tam">${tam}</span>`:""} <span class="foto ${fi.cls}">${fi.txt}</span></span>
+          <span class="nm">${esc(a.modelo||"Sem nome")}</span>
+          <span class="meta">${esc(a.formato||"—")} · <span class="mono">${esc(armMedidas(a))}</span>${a.material?" · "+esc(a.material):""}${a.cor?" · "+esc(a.cor):""}${(parseInt(a.qtd)||1)>1?" · "+a.qtd+" un.":""}</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+        <label class="armst"><span class="sr">Status de ${esc(a.ref)}</span><select class="status" data-s="${a.status}">${ARM_STATUS.map(([k,l])=>`<option value="${k}" ${a.status===k?"selected":""}>${l}</option>`).join("")}</select></label></div>`;
+      el.querySelector(".status").addEventListener("change",e=>{a.status=e.target.value;e.target.dataset.s=a.status;a.atualizada=new Date().toISOString();saveArmacao(a);haptic();toast(a.ref+": "+armStatusLabel(a.status));});
       el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const k=b.dataset.a;
         if(k==="foto"){armFotoRef=a.ref;armView="foto";drawArm();window.scrollTo(0,0);}
-        else if(k==="edit"){armForm=JSON.parse(JSON.stringify(a));armForm.novo=false;armView="form";drawArm();window.scrollTo(0,0);}
-        else if(k==="del"){if(confirm("Excluir "+a.ref+" ("+(a.modelo||"sem nome")+")?")){S.armacoes=S.armacoes.filter(x=>x.ref!==a.ref);deleteArmacao(a.ref);drawArmList();toast(a.ref+" excluída.");}}});
+        else if(k==="edit"){armForm=JSON.parse(JSON.stringify(a));armForm.novo=false;armView="form";drawArm();window.scrollTo(0,0);}});
       box.appendChild(el);});};
   render();
   document.getElementById("armSearch").addEventListener("input",e=>{armBusca=e.target.value;render();});
@@ -1037,6 +1049,7 @@ function drawArmForm(){const a=armForm,novo=a.novo;
       <div class="flab armlab">Quantidade</div>
       <div class="armqtd"><button type="button" class="icobtn" id="a_menos" aria-label="Diminuir quantidade">−</button><span id="a_qtd">${parseInt(a.qtd)||1}</span><button type="button" class="icobtn" id="a_mais" aria-label="Aumentar quantidade">+</button></div></div>
     <div class="armerr" id="a_err"></div>
+    ${novo?"":`<div class="armdel"><button type="button" class="btn ghost" id="a_excluir">Excluir esta armação</button></div>`}
     <div class="armsave"><button class="btn pri" id="a_salvar">${novo?"Salvar e tirar foto ›":"Salvar alterações"}</button></div>`;
   const $=id=>document.getElementById(id);
   $("armVoltar").onclick=()=>{armView="list";drawArm();};
@@ -1054,6 +1067,8 @@ function drawArmForm(){const a=armForm,novo=a.novo;
       if(prox&&v.length===max)$(prox).focus();});});
   const qtd=d=>{a.qtd=Math.max(1,Math.min(99,(parseInt(a.qtd)||1)+d));$("a_qtd").textContent=a.qtd;haptic();};
   $("a_menos").onclick=()=>qtd(-1);$("a_mais").onclick=()=>qtd(1);
+  if($("a_excluir"))$("a_excluir").onclick=()=>{if(!confirm("Excluir "+a.ref+" ("+(a.modelo||"sem nome")+")? Não dá para desfazer."))return;
+    S.armacoes=S.armacoes.filter(x=>x.ref!==a.ref);deleteArmacao(a.ref);toast(a.ref+" excluída.");armForm=null;armView="list";drawArm();window.scrollTo(0,0);};
   $("a_salvar").onclick=()=>{a.modelo=a.modelo.trim();
     const falta=[];if(!a.modelo)falta.push("nome do modelo");if(!a.formato)falta.push("formato");
     if(!a.lente||!a.ponte||!a.haste)falta.push("medidas da haste");
