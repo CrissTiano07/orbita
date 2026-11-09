@@ -284,13 +284,26 @@
   .armvthumb{width:100%;max-width:90px;aspect-ratio:1;object-fit:cover;border-radius:10px;margin:2px 0}
   .armpasso{margin-top:12px;font-size:13px;line-height:1.45;color:#5e4a00;background:#fff8e6;border-radius:var(--rf);padding:11px 13px;text-align:left}
   .arm{position:relative}
-  .armtop{display:grid;grid-template-columns:96px minmax(0,1fr);grid-template-areas:"th info" "th st";column-gap:14px;row-gap:8px;align-items:center}
-  .armtop .armthumb{grid-area:th}
-  .arminfo{grid-area:info;display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:none;border:0;padding:0 26px 0 0;font:inherit;color:inherit;cursor:pointer;position:relative;width:100%}
-  .arminfo .chev{position:absolute;right:0;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--dim)}
-  .arminfo .id{font-family:var(--mono);font-size:12px;color:var(--acc-d)}
-  .armst{grid-area:st;justify-self:start}
-  .armst .status{appearance:none;-webkit-appearance:none;border:0;border-radius:16px;padding:7px 30px 7px 13px;font-family:var(--sans);font-size:13px;font-weight:600;min-height:36px;cursor:pointer;
+  /* grade de produto (referência: Mercado Livre / OLX / Pinterest) — foto domina o card */
+  .armgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  @media(min-width:540px){.armgrid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}}
+  .armgrid .empty{grid-column:1/-1}
+  .ord.arm{padding:0;overflow:hidden;display:flex;flex-direction:column}
+  .armtop{display:flex;flex-direction:column;height:100%}
+  .armthumb{width:100%;aspect-ratio:1/1;border:0;border-bottom:1px solid var(--line);background:var(--surf2);padding:0;overflow:hidden;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--dim);font-family:var(--sans);font-size:12px}
+  .armthumb svg{width:44px;height:44px}
+  .armthumb.tem{background:#efeeeb}
+  .armthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .arminfo{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:none;border:0;padding:10px 12px 6px;font:inherit;color:inherit;cursor:pointer;width:100%;flex:1}
+  .arminfo .chev{display:none}
+  .arminfo .id{font-family:var(--mono);font-size:11.5px;color:var(--acc-d);display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+  .arminfo .id .tam{margin-left:0}
+  .arminfo .nm{font-size:15.5px;font-weight:600;margin:2px 0 0;line-height:1.25}
+  .arminfo .meta{font-size:12px;color:var(--mut);margin:0;line-height:1.35}
+  .arm .foto{margin-left:0;font-size:11px;padding:1px 7px}
+  .armst{padding:0 12px 12px;display:block}
+  .armst .status{width:100%;appearance:none;-webkit-appearance:none;border:0;border-radius:14px;padding:6px 28px 6px 11px;font-family:var(--sans);font-size:12.5px;font-weight:600;min-height:34px;cursor:pointer;text-transform:none;letter-spacing:0;
     background-repeat:no-repeat;background-position:right 10px center;background-size:12px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
   .arm .armst .status[data-s="disponivel"]{background-color:var(--acc-bg);color:var(--acc-d)}
   .arm .armst .status[data-s="prova"]{background-color:#fff1cc;color:#7a5000}
@@ -298,13 +311,6 @@
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .armdel{text-align:center;margin:-2px 0 8px}
   .armdel .btn{color:var(--err);font-weight:600}
-  .armthumb{width:96px;height:96px;border-radius:14px;border:1px dashed var(--line);background:var(--surf2);padding:0;overflow:hidden;cursor:pointer;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--dim);font-family:var(--sans);font-size:11px}
-  .armthumb svg{width:34px;height:34px}
-  .armthumb.tem{border:0;background:#efeeeb}
-  .armthumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .arminfo .foto{display:inline-block;margin:4px 0 0 0}
-  @media(min-width:540px){.armtop{grid-template-columns:120px minmax(0,1fr)}.armthumb{width:120px;height:120px}}
   .armvista.feita{border-style:solid;border-color:var(--acc);background:var(--acc-tint)} .armvista.feita .s{color:var(--acc-d)}
   .empty{border:1px dashed var(--line);border-radius:var(--r);padding:36px 18px;text-align:center;color:var(--mut);font-size:14px}
 
@@ -955,8 +961,8 @@ function armMedidas(a){return (a.lente||"—")+"□"+(a.ponte||"—")+"-"+(a.has
 function armStatusLabel(s){return (ARM_STATUS.find(x=>x[0]===s)||["","—"])[1];}
 function armFotoInfo(a){const f=a.foto||{},ok=ARM_VISTAS.filter(([v])=>f[v]==="ok").length,pend=ARM_VISTAS.filter(([v])=>f[v]==="pendente").length;
   if(!ok&&!pend)return{cls:"no",txt:"sem foto"};
-  if(pend)return{cls:"pend",txt:(ok?ok+" no catálogo · ":"")+pend+" aguardando tratamento"};
-  return{cls:"ok",txt:ok+" foto"+(ok>1?"s":"")+" no catálogo"};}
+  if(pend)return{cls:"pend",txt:"aguardando"};
+  return{cls:"ok",txt:ok+" foto"+(ok>1?"s":"")};}
 /* fotos tratadas ficam no próprio site (GitHub Pages): catalogo/fotos/ORB-0042/frente_400.webp
    catalogo/fotos/index.json lista quais armações têm foto (gerado por ferramentas/fotos/publicar.py).
    O app lê esse índice 1 vez e atualiza todas, venha a foto do app ou de fora. */
@@ -991,7 +997,7 @@ function drawArmList(){const teto=armTeto(),n=armAtivas(),cheio=n>=teto,perto=!c
     <button class="btn pri armnew" id="armNew" ${cheio?"disabled":""}>+ Nova armação</button>
     <div class="chips armfil">${filtros.map(([k,l])=>`<button class="chip ${armFiltro===k?"on":""}" data-f="${k}">${l} <span class="cnt">${cont(k)}</span></button>`).join("")}</div>
     <label class="field search"><span class="flab">Buscar</span><input id="armSearch" value="${esc(armBusca)}" placeholder="Modelo, ref ou cor"></label>
-    <div class="ordens" id="armList"></div>`;
+    <div class="armgrid" id="armList"></div>`;
   document.getElementById("armNew").onclick=()=>{if(armAtivas()>=armTeto())return;armForm=blankArm();armView="form";drawArm();window.scrollTo(0,0);};
   document.querySelectorAll(".armfil .chip").forEach(c=>c.onclick=()=>{armFiltro=c.dataset.f;drawArmList();});
   const render=()=>{const box=document.getElementById("armList"),q=armBusca.toLowerCase();
@@ -1007,7 +1013,8 @@ function drawArmList(){const teto=armTeto(),n=armAtivas(),cheio=n>=teto,perto=!c
       el.innerHTML=`<div class="armtop"><button type="button" class="armthumb ${mv?"tem":""}" data-a="foto" aria-label="Fotos de ${esc(a.ref)}">${thumb}</button>
         <button type="button" class="arminfo" data-a="edit" aria-label="Editar ${esc(a.ref)} ${esc(a.modelo||"")}"><span class="id">${esc(a.ref)}${tam?` <span class="tam">${tam}</span>`:""} <span class="foto ${fi.cls}">${fi.txt}</span></span>
           <span class="nm">${esc(a.modelo||"Sem nome")}</span>
-          <span class="meta">${esc(a.formato||"—")} · <span class="mono">${esc(armMedidas(a))}</span>${a.material?" · "+esc(a.material):""}${a.cor?" · "+esc(a.cor):""}${(parseInt(a.qtd)||1)>1?" · "+a.qtd+" un.":""}</span>
+          <span class="meta">${esc(a.formato||"—")} · <span class="mono">${esc(armMedidas(a))}</span></span>
+          <span class="meta">${[a.material,a.cor].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}${(parseInt(a.qtd)||1)>1?" · "+a.qtd+" un.":""}</span>
           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
         <label class="armst"><span class="sr">Status de ${esc(a.ref)}</span><select class="status" data-s="${a.status}">${ARM_STATUS.map(([k,l])=>`<option value="${k}" ${a.status===k?"selected":""}>${l}</option>`).join("")}</select></label></div>`;
       el.querySelector(".status").addEventListener("change",e=>{a.status=e.target.value;e.target.dataset.s=a.status;a.atualizada=new Date().toISOString();saveArmacao(a);haptic();toast(a.ref+": "+armStatusLabel(a.status));});
